@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI Learning Platform - Offline Education</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#6c63ff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AI Learn">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="static/icons/icon-192.png">
+    
+    <!-- Stlite - Streamlit running in browser (offline capable) -->
+    <script src="https://cdn.jsdelivr.net/npm/@stlite/mountable@0.42.3/build/stlite.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+        }
+        
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: white;
+        }
+        
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(108, 99, 255, 0.2);
+            border-top-color: #6c63ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 1.2rem;
+            color: #a0a0a0;
+        }
+        
+        .loading-subtitle {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 10px;
+        }
+        
+        #root {
+            height: 100vh;
+        }
+        
+        /* Offline indicator */
+        .offline-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #ffc107;
+            color: #333;
+            padding: 8px;
+            text-align: center;
+            font-weight: 600;
+            z-index: 10000;
+            display: none;
+        }
+        
+        .offline-banner.visible {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-banner" id="offline-banner">
+        📴 You are offline - App is running from cache!
+    </div>
+    
+    <div id="loading">
+        <div class="loader"></div>
+        <div class="loading-text">🚀 Loading AI Learning Platform...</div>
+        <div class="loading-subtitle">First load caches app for offline use</div>
+    </div>
+    
+    <div id="root"></div>
+
+    <script>
+        // Check online/offline status
+        function updateOnlineStatus() {
+            const banner = document.getElementById('offline-banner');
+            if (navigator.onLine) {
+                banner.classList.remove('visible');
+            } else {
+                banner.classList.add('visible');
+            }
+        }
+        
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+        updateOnlineStatus();
+        
+        // Register Service Worker for caching
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('SW registered'))
+                .catch(err => console.log('SW failed:', err));
+        }
+        
+        // Mount stlite app
+        stlite.mount({
+            requirements: ["plotly", "networkx"],
+            entrypoint: "app.py",
+            files: {
+                "app.py": `
+import streamlit as st
+import json
+from datetime import datetime
+
+# ============ Page Config ============
+st.set_page_config(
+    page_title="AI Learning Platform",
+    page_icon="📚",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# ============ Session State Init ============
+if "progress" not in st.session_state:
+    st.session_state.progress = {
+        "lessons_completed": [],
+        "quiz_scores": [],
+        "achievements": []
+    }
+
+if "page" not in st.session_state:
+    st.session_state.page = "lessons"
+
+if "current_lesson" not in st.session_state:
+    st.session_state.current_lesson = None
+
+if "quiz_state" not in st.session_state:
+    st.session_state.quiz_state = {"active": False, "answers": {}, "submitted": False}
+
+# ============ Lesson Data ============
+LESSONS = {
+    "motion": {
+        "id": "motion",
+        "title": "Motion and Speed",
+        "subject": "Physics",
+        "difficulty": "Beginner",
+        "duration": "15 min",
+        "objectives": [
+            "Understand what motion means in physics",
+            "Differentiate between distance and displacement",
+            "Calculate speed and velocity"
+        ],
+        "content": [
+            {
+                "title": "What is Motion?",
+                "text": """Motion is the change in position of an object with respect to time.
+                
+**Examples:**
+- A car moving on a road
+- A bird flying in the sky
+- Earth revolving around the Sun
+
+Motion is always relative - a person sitting in a moving bus is at rest relative to the bus but in motion relative to the ground."""
+            },
+            {
+                "title": "Distance vs Displacement",
+                "text": """**Distance** = Total path length traveled (scalar)
+                
+**Displacement** = Shortest path between start and end (vector)
+
+**Example:** Walking 3 km east then 4 km north:
+- Distance = 7 km
+- Displacement = 5 km (Pythagorean theorem)"""
+            },
+            {
+                "title": "Speed and Velocity",
+                "text": """**Speed = Distance / Time** (scalar)
+
+**Velocity = Displacement / Time** (vector)
+
+Units: m/s or km/h
+
+**Example:** A car travels 100 km in 2 hours
+Speed = 100/2 = 50 km/h"""
+            }
+        ],
+        "key_points": [
+            "Motion is change in position over time",
+            "Distance is scalar; displacement is vector",
+            "Speed is scalar; velocity is vector"
+        ],
+        "quiz": [
+            {
+                "q": "What is the SI unit of speed?",
+                "options": ["km/h", "m/s", "cm/s", "mph"],
+                "answer": 1,
+                "explanation": "The SI unit of speed is meters per second (m/s)."
+            },
+            {
+                "q": "A car travels 150 km in 3 hours. What is its average speed?",
+                "options": ["30 km/h", "40 km/h", "50 km/h", "60 km/h"],
+                "answer": 2,
+                "explanation": "Speed = Distance/Time = 150/3 = 50 km/h"
+            },
+            {
+                "q": "Which quantity has both magnitude and direction?",
+                "options": ["Distance", "Speed", "Displacement", "Time"],
+                "answer": 2,
+                "explanation": "Displacement is a vector quantity with both magnitude and direction."
+            },
+            {
+                "q": "If you walk in a circle back to start, displacement is:",
+                "options": ["Equal to distance", "Half the distance", "Zero", "Cannot determine"],
+                "answer": 2,
+                "explanation": "Displacement is zero because start and end positions are the same."
+            }
+        ]
+    },
+    "force": {
+        "id": "force",
+        "title": "Force and Laws of Motion",
+        "subject": "Physics",
+        "difficulty": "Intermediate",
+        "duration": "20 min",
+        "objectives": [
+            "Understand the concept of force",
+            "Learn Newton's three laws of motion",
+            "Apply laws to solve problems"
+        ],
+        "content": [
+            {
+                "title": "What is Force?",
+                "text": """Force is a push or pull that can change an object's motion.
+
+**Effects of force:**
+- Start or stop motion
+- Change speed
+- Change direction
+- Change shape
+
+**Unit:** Newton (N)"""
+            },
+            {
+                "title": "Newton's First Law (Inertia)",
+                "text": """An object at rest stays at rest, and an object in motion stays in motion with the same speed and direction, unless acted upon by an unbalanced force.
+
+**Examples:**
+- Passengers lurch forward when bus stops
+- Ball keeps rolling until friction stops it"""
+            },
+            {
+                "title": "Newton's Second Law",
+                "text": """**F = m × a**
+
+Where:
+- F = Force (Newtons)
+- m = Mass (kg)
+- a = Acceleration (m/s²)
+
+**Example:** 10 kg object accelerates at 5 m/s²
+Force = 10 × 5 = 50 N"""
+            },
+            {
+                "title": "Newton's Third Law",
+                "text": """For every action, there is an equal and opposite reaction.
+
+**Examples:**
+- Rocket pushes gas down, gas pushes rocket up
+- You push wall, wall pushes you back
+- Gun recoils when bullet fires"""
+            }
+        ],
+        "key_points": [
+            "Force is measured in Newtons",
+            "First Law: Objects resist changes (inertia)",
+            "Second Law: F = m × a",
+            "Third Law: Action = Reaction"
+        ],
+        "quiz": [
+            {
+                "q": "What is the SI unit of force?",
+                "options": ["Joule", "Newton", "Pascal", "Watt"],
+                "answer": 1,
+                "explanation": "The SI unit of force is Newton (N)."
+            },
+            {
+                "q": "A 5 kg object is pushed with 20 N force. Acceleration is:",
+                "options": ["2 m/s²", "4 m/s²", "25 m/s²", "100 m/s²"],
+                "answer": 1,
+                "explanation": "a = F/m = 20/5 = 4 m/s²"
+            },
+            {
+                "q": "Which law explains why seatbelts are important?",
+                "options": ["First Law", "Second Law", "Third Law", "Gravitation"],
+                "answer": 0,
+                "explanation": "First Law (Inertia) - body continues moving when car stops."
+            }
+        ]
+    },
+    "gravity": {
+        "id": "gravity",
+        "title": "Gravitation",
+        "subject": "Physics",
+        "difficulty": "Intermediate",
+        "duration": "18 min",
+        "objectives": [
+            "Understand Newton's Law of Gravitation",
+            "Learn about acceleration due to gravity",
+            "Differentiate between mass and weight"
+        ],
+        "content": [
+            {
+                "title": "Universal Law of Gravitation",
+                "text": """Every object attracts every other object with a force:
+
+**F = G × (m₁ × m₂) / r²**
+
+Where:
+- G = 6.67 × 10⁻¹¹ Nm²/kg²
+- m₁, m₂ = Masses
+- r = Distance between centers"""
+            },
+            {
+                "title": "Acceleration Due to Gravity",
+                "text": """On Earth's surface: **g = 9.8 m/s²**
+
+**Variations:**
+- Maximum at poles
+- Minimum at equator
+- Decreases with altitude
+- Decreases with depth"""
+            },
+            {
+                "title": "Mass vs Weight",
+                "text": """**Mass:**
+- Amount of matter
+- Constant everywhere
+- Unit: kg
+
+**Weight = m × g**
+- Gravitational force
+- Changes with location
+- Unit: Newton
+
+Example: 60 kg person
+- Earth weight: 60 × 9.8 = 588 N
+- Moon weight: 60 × 1.6 = 96 N"""
+            }
+        ],
+        "key_points": [
+            "g ≈ 9.8 m/s² on Earth",
+            "Weight = mass × g",
+            "Mass is constant; weight varies"
+        ],
+        "quiz": [
+            {
+                "q": "Value of g on Earth is approximately:",
+                "options": ["9.8 m/s", "9.8 m/s²", "10 km/h", "6.67 m/s²"],
+                "answer": 1,
+                "explanation": "g = 9.8 m/s² (meters per second squared)"
+            },
+            {
+                "q": "Weight of 10 kg object on Earth (g=10):",
+                "options": ["10 N", "100 N", "1 N", "10 kg"],
+                "answer": 1,
+                "explanation": "W = mg = 10 × 10 = 100 N"
+            }
+        ]
+    },
+    "energy": {
+        "id": "energy",
+        "title": "Work, Energy and Power",
+        "subject": "Physics",
+        "difficulty": "Intermediate",
+        "duration": "22 min",
+        "objectives": [
+            "Understand scientific meaning of work",
+            "Learn about kinetic and potential energy",
+            "Calculate power"
+        ],
+        "content": [
+            {
+                "title": "What is Work?",
+                "text": """Work is done when force causes displacement.
+
+**W = F × d**
+
+Where:
+- W = Work (Joules)
+- F = Force (Newtons)
+- d = Displacement (meters)
+
+Work requires: Force + Movement in force direction"""
+            },
+            {
+                "title": "Types of Energy",
+                "text": """**Kinetic Energy:** KE = ½mv²
+Energy of motion
+
+**Potential Energy:** PE = mgh
+Energy due to position
+
+**Conservation:** Total energy remains constant
+PE ↔ KE (transformation)"""
+            },
+            {
+                "title": "Power",
+                "text": """Power = Work / Time
+
+**P = W/t**
+
+Units:
+- Watt (W) = 1 J/s
+- 1 kW = 1000 W
+- 1 HP = 746 W"""
+            }
+        ],
+        "key_points": [
+            "Work = Force × Displacement",
+            "KE = ½mv², PE = mgh",
+            "Power = Work/Time (Watts)"
+        ],
+        "quiz": [
+            {
+                "q": "SI unit of work is:",
+                "options": ["Newton", "Watt", "Joule", "Pascal"],
+                "answer": 2,
+                "explanation": "Work is measured in Joules (J)"
+            },
+            {
+                "q": "KE of 2 kg ball moving at 10 m/s:",
+                "options": ["20 J", "100 J", "50 J", "200 J"],
+                "answer": 1,
+                "explanation": "KE = ½mv² = ½×2×100 = 100 J"
+            }
+        ]
+    },
+    "sound": {
+        "id": "sound",
+        "title": "Sound",
+        "subject": "Physics",
+        "difficulty": "Intermediate",
+        "duration": "20 min",
+        "objectives": [
+            "Understand how sound is produced",
+            "Learn about sound wave properties",
+            "Explore speed of sound"
+        ],
+        "content": [
+            {
+                "title": "Production of Sound",
+                "text": """Sound is produced by vibrating objects.
+
+**Examples:**
+- Vocal cords vibrate
+- Guitar strings vibrate
+- Drum membrane vibrates
+
+**Important:** Sound needs a medium to travel.
+Cannot travel through vacuum!"""
+            },
+            {
+                "title": "Sound Waves",
+                "text": """Sound travels as **longitudinal waves**.
+
+**Compressions:** High pressure regions
+**Rarefactions:** Low pressure regions
+
+**Properties:**
+- Wavelength (λ)
+- Frequency (Hz)
+- Amplitude (loudness)"""
+            },
+            {
+                "title": "Speed of Sound",
+                "text": """**v = f × λ**
+
+Speed in different media:
+- Air: 343 m/s
+- Water: 1498 m/s
+- Steel: 5960 m/s
+
+**Rule:** Solid > Liquid > Gas"""
+            }
+        ],
+        "key_points": [
+            "Sound needs a medium",
+            "Longitudinal waves",
+            "Speed: Solid > Liquid > Gas"
+        ],
+        "quiz": [
+            {
+                "q": "Sound waves are:",
+                "options": ["Transverse", "Longitudinal", "Electromagnetic", "Surface"],
+                "answer": 1,
+                "explanation": "Sound waves are longitudinal waves."
+            },
+            {
+                "q": "Sound travels fastest in:",
+                "options": ["Air", "Water", "Steel", "Vacuum"],
+                "answer": 2,
+                "explanation": "Sound travels fastest in solids like steel."
+            }
+        ]
+    }
+}
+
+# ============ Helper Functions ============
+def save_progress():
+    """Progress is automatically saved in session state"""
+    pass
+
+def mark_complete(lesson_id):
+    if lesson_id not in st.session_state.progress["lessons_completed"]:
+        st.session_state.progress["lessons_completed"].append(lesson_id)
+
+def record_quiz_score(lesson_id, score, total):
+    st.session_state.progress["quiz_scores"].append({
+        "lesson": lesson_id,
+        "score": score,
+        "total": total,
+        "percent": round(score/total*100)
+    })
+
+# ============ Sidebar ============
+with st.sidebar:
+    st.markdown("# 📚 AI Learn")
+    st.markdown("*Offline Learning Platform*")
+    st.divider()
+    
+    if st.button("📖 Lessons", use_container_width=True, 
+                type="primary" if st.session_state.page == "lessons" else "secondary"):
+        st.session_state.page = "lessons"
+        st.session_state.current_lesson = None
+        st.session_state.quiz_state = {"active": False, "answers": {}, "submitted": False}
+        st.rerun()
+    
+    if st.button("📝 Quiz", use_container_width=True,
+                type="primary" if st.session_state.page == "quiz" else "secondary"):
+        st.session_state.page = "quiz"
+        st.session_state.quiz_state = {"active": False, "answers": {}, "submitted": False}
+        st.rerun()
+    
+    if st.button("📊 Progress", use_container_width=True,
+                type="primary" if st.session_state.page == "progress" else "secondary"):
+        st.session_state.page = "progress"
+        st.rerun()
+    
+    st.divider()
+    
+    # Quick stats
+    completed = len(st.session_state.progress["lessons_completed"])
+    total_lessons = len(LESSONS)
+    st.metric("Lessons Done", f"{completed}/{total_lessons}")
+    
+    scores = st.session_state.progress["quiz_scores"]
+    if scores:
+        avg = sum(s["percent"] for s in scores) / len(scores)
+        st.metric("Avg Score", f"{avg:.0f}%")
+    else:
+        st.metric("Avg Score", "N/A")
+    
+    st.divider()
+    st.success("🌐 Works Offline!")
+
+# ============ Main Content ============
+
+# LESSONS PAGE
+if st.session_state.page == "lessons":
+    if st.session_state.current_lesson:
+        lesson = LESSONS[st.session_state.current_lesson]
+        
+        if st.button("← Back to Lessons"):
+            st.session_state.current_lesson = None
+            st.rerun()
+        
+        st.title(lesson["title"])
+        
+        cols = st.columns(4)
+        cols[0].metric("Subject", lesson["subject"])
+        cols[1].metric("Difficulty", lesson["difficulty"])
+        cols[2].metric("Duration", lesson["duration"])
+        is_done = lesson["id"] in st.session_state.progress["lessons_completed"]
+        cols[3].metric("Status", "✅ Done" if is_done else "📖 In Progress")
+        
+        st.divider()
+        
+        with st.expander("🎯 Learning Objectives", expanded=True):
+            for obj in lesson["objectives"]:
+                st.markdown(f"• {obj}")
+        
+        st.divider()
+        
+        for section in lesson["content"]:
+            st.subheader(section["title"])
+            st.markdown(section["text"])
+            st.write("")
+        
+        st.divider()
+        st.subheader("📌 Key Points")
+        for point in lesson["key_points"]:
+            st.success(f"✓ {point}")
+        
+        st.divider()
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("✅ Mark Complete", use_container_width=True):
+                mark_complete(lesson["id"])
+                st.balloons()
+                st.rerun()
+        with col2:
+            if st.button("📝 Take Quiz", use_container_width=True):
+                st.session_state.page = "quiz"
+                st.session_state.quiz_state = {
+                    "active": True,
+                    "lesson": lesson["id"],
+                    "answers": {},
+                    "submitted": False
+                }
+                st.rerun()
+    else:
+        st.title("📖 Available Lessons")
+        st.markdown("Select a lesson to start learning!")
+        
+        completed_ids = st.session_state.progress["lessons_completed"]
+        
+        for lid, lesson in LESSONS.items():
+            is_done = lid in completed_ids
+            emoji = "✅" if is_done else "📖"
+            
+            col1, col2 = st.columns([4, 1])
+            with col1:
+                if st.button(f"{emoji} {lesson['title']}", key=lid, use_container_width=True):
+                    st.session_state.current_lesson = lid
+                    st.rerun()
+            with col2:
+                st.caption(f"{lesson['difficulty']} • {lesson['duration']}")
+
+# QUIZ PAGE
+elif st.session_state.page == "quiz":
+    if st.session_state.quiz_state.get("active"):
+        lesson_id = st.session_state.quiz_state["lesson"]
+        lesson = LESSONS[lesson_id]
+        questions = lesson["quiz"]
+        
+        st.title(f"📝 Quiz: {lesson['title']}")
+        st.markdown(f"**{len(questions)} questions** • Answer all and submit")
+        st.divider()
+        
+        for i, q in enumerate(questions):
+            st.markdown(f"**Q{i+1}.** {q['q']}")
+            key = f"q_{i}"
+            selected = st.radio(
+                "Select answer:",
+                options=q["options"],
+                key=key,
+                index=None,
+                label_visibility="collapsed"
+            )
+            if selected:
+                st.session_state.quiz_state["answers"][i] = q["options"].index(selected)
+            
+            if st.session_state.quiz_state["submitted"]:
+                user_ans = st.session_state.quiz_state["answers"].get(i, -1)
+                if user_ans == q["answer"]:
+                    st.success("✅ Correct!")
+                else:
+                    st.error(f"❌ Incorrect. Answer: {q['options'][q['answer']]}")
+                st.info(f"💡 {q['explanation']}")
+            st.write("")
+        
+        st.divider()
+        
+        if not st.session_state.quiz_state["submitted"]:
+            answered = len(st.session_state.quiz_state["answers"])
+            st.progress(answered/len(questions), text=f"{answered}/{len(questions)} answered")
+            
+            if st.button("Submit Quiz", type="primary", use_container_width=True):
+                st.session_state.quiz_state["submitted"] = True
+                
+                # Calculate score
+                correct = 0
+                for i, q in enumerate(questions):
+                    if st.session_state.quiz_state["answers"].get(i) == q["answer"]:
+                        correct += 1
+                
+                record_quiz_score(lesson_id, correct, len(questions))
+                st.rerun()
+        else:
+            scores = st.session_state.progress["quiz_scores"]
+            if scores:
+                last = scores[-1]
+                pct = last["percent"]
+                if pct >= 80:
+                    st.balloons()
+                    st.success(f"🎉 Excellent! Score: {pct}%")
+                elif pct >= 60:
+                    st.info(f"👍 Good job! Score: {pct}%")
+                else:
+                    st.warning(f"📚 Keep practicing! Score: {pct}%")
+            
+            if st.button("🔄 Try Again", use_container_width=True):
+                st.session_state.quiz_state = {
+                    "active": True,
+                    "lesson": lesson_id,
+                    "answers": {},
+                    "submitted": False
+                }
+                st.rerun()
+            
+            if st.button("📚 Back to Lessons", use_container_width=True):
+                st.session_state.page = "lessons"
+                st.session_state.quiz_state = {"active": False}
+                st.rerun()
+    else:
+        st.title("📝 Practice Quiz")
+        st.markdown("Test your knowledge!")
+        
+        lesson_options = {l["title"]: lid for lid, l in LESSONS.items()}
+        selected = st.selectbox("Select a topic:", list(lesson_options.keys()))
+        
+        if st.button("🚀 Start Quiz", type="primary", use_container_width=True):
+            st.session_state.quiz_state = {
+                "active": True,
+                "lesson": lesson_options[selected],
+                "answers": {},
+                "submitted": False
+            }
+            st.rerun()
+        
+        st.divider()
+        st.subheader("📊 Quiz History")
+        scores = st.session_state.progress["quiz_scores"]
+        if scores:
+            for s in reversed(scores[-5:]):
+                lesson_title = LESSONS.get(s["lesson"], {}).get("title", s["lesson"])
+                emoji = "🟢" if s["percent"] >= 80 else "🟡" if s["percent"] >= 60 else "🔴"
+                st.markdown(f"{emoji} **{lesson_title}**: {s['percent']}%")
+        else:
+            st.info("No quiz history yet!")
+
+# PROGRESS PAGE
+elif st.session_state.page == "progress":
+    st.title("📊 Your Progress")
+    
+    completed = len(st.session_state.progress["lessons_completed"])
+    total = len(LESSONS)
+    scores = st.session_state.progress["quiz_scores"]
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("📚 Lessons", f"{completed}/{total}", f"{completed/total*100:.0f}%")
+    with col2:
+        st.metric("📝 Quizzes", len(scores))
+    with col3:
+        if scores:
+            avg = sum(s["percent"] for s in scores) / len(scores)
+            st.metric("🎯 Avg Score", f"{avg:.0f}%")
+        else:
+            st.metric("🎯 Avg Score", "N/A")
+    
+    st.divider()
+    
+    st.subheader("📚 Lesson Progress")
+    st.progress(completed/total if total > 0 else 0)
+    
+    for lid, lesson in LESSONS.items():
+        is_done = lid in st.session_state.progress["lessons_completed"]
+        if is_done:
+            st.markdown(f"✅ ~~{lesson['title']}~~")
+        else:
+            st.markdown(f"⬜ {lesson['title']}")
+    
+    st.divider()
+    
+    st.subheader("📝 Recent Quiz Scores")
+    if scores:
+        for s in reversed(scores[-5:]):
+            lesson_title = LESSONS.get(s["lesson"], {}).get("title", s["lesson"])
+            emoji = "🟢" if s["percent"] >= 80 else "🟡" if s["percent"] >= 60 else "🔴"
+            st.markdown(f"{emoji} **{lesson_title}**: {s['score']}/{s['total']} ({s['percent']}%)")
+    else:
+        st.info("Take a quiz to see your scores here!")
+`
+            },
+            mountTarget: document.getElementById("root"),
+            onProgress: (progress) => {
+                const loading = document.getElementById('loading');
+                if (progress && progress.message) {
+                    const subtitle = loading.querySelector('.loading-subtitle');
+                    if (subtitle) {
+                        subtitle.textContent = progress.message;
+                    }
+                }
+            }
+        }).then(() => {
+            document.getElementById('loading').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
