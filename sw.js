@@ -1,46 +1,33 @@
-const CACHE_NAME = 'ai-learning-v2';
-const STLITE_CACHE = 'stlite-cache-v1';
+const CACHE_NAME = 'ai-learning-v3';
 
-// Core files to cache immediately
+// All files to cache - this is a single-page app!
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/static/styles.css',
-  '/static/icons/icon-192.svg',
-  '/static/icons/icon-512.svg'
+  './',
+  './index.html',
+  './manifest.json'
 ];
 
-// Stlite resources to cache on first load
-const STLITE_RESOURCES = [
-  'https://cdn.jsdelivr.net/npm/@stlite/mountable@0.42.3/build/stlite.js'
-];
-
-// Install event - cache static assets
+// Install - cache everything immediately
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing v2...');
+  console.log('[SW] Installing v3...');
   event.waitUntil(
-    Promise.all([
-      caches.open(CACHE_NAME).then((cache) => {
-        console.log('[SW] Caching static assets');
+    caches.open(CACHE_NAME)
+      .then((cache) => {
+        console.log('[SW] Caching all assets');
         return cache.addAll(STATIC_ASSETS);
-      }),
-      caches.open(STLITE_CACHE).then((cache) => {
-        console.log('[SW] Caching stlite resources');
-        return cache.addAll(STLITE_RESOURCES);
       })
-    ]).then(() => self.skipWaiting())
+      .then(() => self.skipWaiting())
   );
 });
 
-// Activate event - clean up old caches
+// Activate - clean old caches
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating v2...');
+  console.log('[SW] Activating v3...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames
-          .filter((name) => !name.startsWith('ai-learning') && !name.startsWith('stlite'))
+          .filter((name) => name !== CACHE_NAME)
           .map((name) => {
             console.log('[SW] Deleting old cache:', name);
             return caches.delete(name);
@@ -50,80 +37,43 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch event - serve from cache, fallback to network
+// Fetch - cache first, then network
 self.addEventListener('fetch', (event) => {
-  const { request } = event;
-  const url = new URL(request.url);
-
   // Skip non-GET requests
-  if (request.method !== 'GET') return;
+  if (event.request.method !== 'GET') return;
 
-  // Skip chrome-extension and other non-http requests
-  if (!url.protocol.startsWith('http')) return;
+  // Skip chrome-extension and non-http
+  if (!event.request.url.startsWith('http')) return;
 
-  // For jsdelivr CDN resources (stlite, pyodide), use cache-first
-  if (url.hostname.includes('jsdelivr') ||
-    url.hostname.includes('pypi') ||
-    url.hostname.includes('pyodide')) {
-    event.respondWith(
-      caches.match(request).then((cached) => {
-        if (cached) {
-          return cached;
-        }
-        return fetch(request).then((response) => {
-          if (response.ok) {
-            const clone = response.clone();
-            caches.open(STLITE_CACHE).then((cache) => {
-              cache.put(request, clone);
-            });
-          }
-          return response;
-        });
-      })
-    );
-    return;
-  }
-
-  // For local resources, use cache-first with network fallback
   event.respondWith(
-    caches.match(request).then((cachedResponse) => {
-      if (cachedResponse) {
-        // Update cache in background
-        fetch(request).then((response) => {
-          if (response.ok) {
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(request, response);
-            });
-          }
-        }).catch(() => { });
+    caches.match(event.request)
+      .then((cachedResponse) => {
+        // Return cached version if available
+        if (cachedResponse) {
+          console.log('[SW] Serving from cache:', event.request.url);
+          return cachedResponse;
+        }
 
-        return cachedResponse;
-      }
-
-      // Not in cache - fetch from network
-      return fetch(request).then((response) => {
-        if (response.ok) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, clone);
+        // Otherwise fetch from network and cache
+        return fetch(event.request)
+          .then((response) => {
+            // Only cache successful responses
+            if (response.ok) {
+              const responseClone = response.clone();
+              caches.open(CACHE_NAME)
+                .then((cache) => {
+                  cache.put(event.request, responseClone);
+                });
+            }
+            return response;
+          })
+          .catch(() => {
+            // If both cache and network fail, return the index.html
+            // This ensures the SPA works for any route
+            return caches.match('./index.html');
           });
-        }
-        return response;
-      }).catch(() => {
-        // Return offline fallback for HTML
-        if (request.headers.get('accept')?.includes('text/html')) {
-          return caches.match('/index.html');
-        }
-      });
-    })
+      })
   );
 });
 
-// Message handler for cache updates
-self.addEventListener('message', (event) => {
-  if (event.data === 'skipWaiting') {
-    self.skipWaiting();
-  }
-});
-
-console.log('[SW] Script loaded - Offline support enabled');
+console.log('[SW] Service Worker loaded - Offline mode ready!');

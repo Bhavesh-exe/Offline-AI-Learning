@@ -1,827 +1,1242 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AI Learning Platform - Offline Education</title>
-    
+
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#6c63ff">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="AI Learn">
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="static/icons/icon-192.png">
-    
-    <!-- Stlite - Streamlit running in browser (offline capable) -->
-    <script src="https://cdn.jsdelivr.net/npm/@stlite/mountable@0.42.3/build/stlite.js"></script>
-    
+
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
-        body {
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            min-height: 100vh;
+
+        :root {
+            --primary: #6c63ff;
+            --primary-dark: #5a52d9;
+            --bg-dark: #1a1a2e;
+            --bg-card: #16213e;
+            --bg-light: #0f3460;
+            --text: #ffffff;
+            --text-muted: #a0a0a0;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
         }
-        
-        #loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+
+        body {
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark), var(--bg-card));
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            color: white;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
-        .loader {
-            width: 60px;
-            height: 60px;
-            border: 5px solid rgba(108, 99, 255, 0.2);
-            border-top-color: #6c63ff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 30px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+            font-size: 1rem;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: rgba(108, 99, 255, 0.3);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        }
+
+        .stats-section {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .offline-badge {
+            background: var(--success);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.85rem;
+            margin-top: 15px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            max-height: 100vh;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .page-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 30px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-light);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 4px solid var(--primary);
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(108, 99, 255, 0.2);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .card-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            background: rgba(108, 99, 255, 0.2);
+        }
+
+        .card-meta {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Lesson View */
+        .lesson-header {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .lesson-meta {
+            background: var(--bg-light);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .meta-label {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+        }
+
+        .meta-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            padding: 10px 0;
+        }
+
+        .back-btn:hover {
+            color: var(--text);
+        }
+
+        .section {
+            background: var(--bg-light);
+            border-radius: 12px;
+            padding: 25px;
             margin-bottom: 20px;
         }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+
+        .section h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
         }
-        
-        .loading-text {
-            font-size: 1.2rem;
-            color: #a0a0a0;
+
+        .section p {
+            line-height: 1.8;
+            white-space: pre-line;
         }
-        
-        .loading-subtitle {
-            font-size: 0.9rem;
-            color: #6c757d;
-            margin-top: 10px;
+
+        .key-points {
+            margin-top: 30px;
         }
-        
-        #root {
-            height: 100vh;
+
+        .key-point {
+            background: rgba(40, 167, 69, 0.2);
+            border-left: 4px solid var(--success);
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 0 8px 8px 0;
         }
-        
-        /* Offline indicator */
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(108, 99, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        /* Quiz */
+        .quiz-question {
+            background: var(--bg-light);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .quiz-option {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            color: white;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quiz-option:hover {
+            border-color: var(--primary);
+            background: rgba(108, 99, 255, 0.1);
+        }
+
+        .quiz-option.selected {
+            border-color: var(--primary);
+            background: rgba(108, 99, 255, 0.2);
+        }
+
+        .quiz-option.correct {
+            border-color: var(--success);
+            background: rgba(40, 167, 69, 0.2);
+        }
+
+        .quiz-option.incorrect {
+            border-color: var(--danger);
+            background: rgba(220, 53, 69, 0.2);
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: rgba(40, 167, 69, 0.2);
+            border-left: 4px solid var(--success);
+        }
+
+        .feedback.incorrect {
+            background: rgba(220, 53, 69, 0.2);
+            border-left: 4px solid var(--danger);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), #ff6584);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .result-card {
+            background: var(--bg-light);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .result-score {
+            font-size: 4rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        /* Progress Page */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--bg-light);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .stat-name {
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 15px;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .logo,
+            .subtitle {
+                width: 100%;
+            }
+
+            .nav-btn {
+                flex: 1;
+                min-width: 80px;
+                text-align: center;
+                padding: 10px;
+            }
+
+            .stats-section {
+                display: none;
+            }
+
+            .lesson-header {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Offline banner */
         .offline-banner {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            background: #ffc107;
+            background: var(--warning);
             color: #333;
-            padding: 8px;
+            padding: 10px;
             text-align: center;
             font-weight: 600;
-            z-index: 10000;
+            z-index: 1000;
             display: none;
         }
-        
-        .offline-banner.visible {
+
+        .offline-banner.show {
             display: block;
         }
     </style>
 </head>
+
 <body>
-    <div class="offline-banner" id="offline-banner">
-        📴 You are offline - App is running from cache!
-    </div>
-    
-    <div id="loading">
-        <div class="loader"></div>
-        <div class="loading-text">🚀 Loading AI Learning Platform...</div>
-        <div class="loading-subtitle">First load caches app for offline use</div>
-    </div>
-    
-    <div id="root"></div>
+    <div class="offline-banner" id="offlineBanner">📴 You are offline - App running from cache!</div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">📚 AI Learn</div>
+        <div class="subtitle">Offline Learning Platform</div>
+
+        <button class="nav-btn active" onclick="showPage('lessons')" id="nav-lessons">📖 Lessons</button>
+        <button class="nav-btn" onclick="showPage('quiz')" id="nav-quiz">📝 Quiz</button>
+        <button class="nav-btn" onclick="showPage('progress')" id="nav-progress">📊 Progress</button>
+
+        <div class="stats-section">
+            <div class="stat-item">
+                <span class="stat-label">Lessons Done</span>
+                <span class="stat-value" id="sidebar-lessons">0/5</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Avg Score</span>
+                <span class="stat-value" id="sidebar-score">N/A</span>
+            </div>
+            <div class="offline-badge">🌐 Works Offline!</div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Lessons List Page -->
+        <div class="page active" id="page-lessons">
+            <h1>📖 Available Lessons</h1>
+            <p class="page-subtitle">Select a lesson to start learning!</p>
+            <div id="lessons-list"></div>
+        </div>
+
+        <!-- Lesson Detail Page -->
+        <div class="page" id="page-lesson-detail">
+            <button class="back-btn" onclick="showPage('lessons')">← Back to Lessons</button>
+            <div id="lesson-content"></div>
+        </div>
+
+        <!-- Quiz Select Page -->
+        <div class="page" id="page-quiz">
+            <h1>📝 Practice Quiz</h1>
+            <p class="page-subtitle">Test your knowledge with auto-generated questions!</p>
+
+            <div class="section">
+                <h3>Select a Topic</h3>
+                <select id="quiz-topic"
+                    style="width:100%; padding:12px; border-radius:8px; background:rgba(255,255,255,0.1); color:white; border:none; font-size:1rem; margin-bottom:20px;">
+                </select>
+                <button class="btn btn-primary" onclick="startQuiz()" style="width:100%">🚀 Start Quiz</button>
+            </div>
+
+            <div class="section" style="margin-top:30px;">
+                <h3>📊 Quiz History</h3>
+                <div id="quiz-history"></div>
+            </div>
+        </div>
+
+        <!-- Quiz Active Page -->
+        <div class="page" id="page-quiz-active">
+            <h1 id="quiz-title">📝 Quiz</h1>
+            <div class="progress-bar">
+                <div class="progress-fill" id="quiz-progress"></div>
+            </div>
+            <div id="quiz-questions"></div>
+            <button class="btn btn-primary" id="submit-quiz" onclick="submitQuiz()"
+                style="width:100%; margin-top:20px;">Submit Quiz</button>
+        </div>
+
+        <!-- Quiz Results Page -->
+        <div class="page" id="page-quiz-results">
+            <div class="result-card">
+                <div class="result-score" id="result-score">0%</div>
+                <p id="result-message">Keep practicing!</p>
+                <div class="action-buttons" style="justify-content:center; margin-top:30px;">
+                    <button class="btn btn-primary" onclick="retryQuiz()">🔄 Try Again</button>
+                    <button class="btn btn-secondary" onclick="showPage('lessons')">📚 Back to Lessons</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Page -->
+        <div class="page" id="page-progress">
+            <h1>📊 Your Progress</h1>
+            <p class="page-subtitle">Track your learning journey!</p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📚</div>
+                    <div class="stat-number" id="progress-lessons">0/5</div>
+                    <div class="stat-name">Lessons Completed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📝</div>
+                    <div class="stat-number" id="progress-quizzes">0</div>
+                    <div class="stat-name">Quizzes Taken</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-number" id="progress-avg">N/A</div>
+                    <div class="stat-name">Average Score</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>📚 Lesson Progress</h3>
+                <div class="progress-bar" style="height:12px; margin-bottom:20px;">
+                    <div class="progress-fill" id="lesson-progress-bar"></div>
+                </div>
+                <div id="lesson-progress-list"></div>
+            </div>
+
+            <div class="section">
+                <h3>📝 Recent Quiz Scores</h3>
+                <div id="progress-quiz-history"></div>
+            </div>
+        </div>
+    </main>
 
     <script>
-        // Check online/offline status
-        function updateOnlineStatus() {
-            const banner = document.getElementById('offline-banner');
-            if (navigator.onLine) {
-                banner.classList.remove('visible');
-            } else {
-                banner.classList.add('visible');
+        // ============ LESSON DATA ============
+        const LESSONS = {
+            "motion": {
+                id: "motion",
+                title: "Motion and Speed",
+                subject: "Physics",
+                difficulty: "Beginner",
+                duration: "15 min",
+                objectives: [
+                    "Understand what motion means in physics",
+                    "Differentiate between distance and displacement",
+                    "Calculate speed and velocity"
+                ],
+                content: [
+                    {
+                        title: "What is Motion?",
+                        text: `Motion is the change in position of an object with respect to time.
+
+Examples:
+• A car moving on a road
+• A bird flying in the sky
+• Earth revolving around the Sun
+
+Motion is always relative - a person sitting in a moving bus is at rest relative to the bus but in motion relative to the ground.`
+                    },
+                    {
+                        title: "Distance vs Displacement",
+                        text: `Distance = Total path length traveled (scalar quantity)
+
+Displacement = Shortest path between start and end (vector quantity)
+
+Example: Walking 3 km east then 4 km north:
+• Distance = 3 + 4 = 7 km
+• Displacement = 5 km (using Pythagorean theorem)`
+                    },
+                    {
+                        title: "Speed and Velocity",
+                        text: `Speed = Distance / Time (scalar)
+Velocity = Displacement / Time (vector)
+
+Units: m/s or km/h
+
+Example: A car travels 100 km in 2 hours
+Speed = 100/2 = 50 km/h`
+                    }
+                ],
+                keyPoints: [
+                    "Motion is change in position over time",
+                    "Distance is scalar; displacement is vector",
+                    "Speed is scalar; velocity is vector"
+                ],
+                quiz: [
+                    { q: "What is the SI unit of speed?", options: ["km/h", "m/s", "cm/s", "mph"], answer: 1, explanation: "The SI unit of speed is meters per second (m/s)." },
+                    { q: "A car travels 150 km in 3 hours. Average speed is:", options: ["30 km/h", "40 km/h", "50 km/h", "60 km/h"], answer: 2, explanation: "Speed = Distance/Time = 150/3 = 50 km/h" },
+                    { q: "Which has both magnitude and direction?", options: ["Distance", "Speed", "Displacement", "Time"], answer: 2, explanation: "Displacement is a vector quantity." },
+                    { q: "Walking in a circle back to start, displacement is:", options: ["Equal to distance", "Half distance", "Zero", "Cannot determine"], answer: 2, explanation: "Displacement is zero when start and end are same." }
+                ]
+            },
+            "force": {
+                id: "force",
+                title: "Force and Laws of Motion",
+                subject: "Physics",
+                difficulty: "Intermediate",
+                duration: "20 min",
+                objectives: [
+                    "Understand the concept of force",
+                    "Learn Newton's three laws of motion",
+                    "Apply laws to solve problems"
+                ],
+                content: [
+                    {
+                        title: "What is Force?",
+                        text: `Force is a push or pull that can change an object's motion.
+
+Effects of force:
+• Start or stop motion
+• Change speed
+• Change direction
+• Change shape
+
+Unit: Newton (N)`
+                    },
+                    {
+                        title: "Newton's First Law (Inertia)",
+                        text: `An object at rest stays at rest, and an object in motion stays in motion with the same speed and direction, unless acted upon by an unbalanced force.
+
+Examples:
+• Passengers lurch forward when bus stops suddenly
+• Ball keeps rolling until friction stops it
+• Dust flies off when you shake a carpet`
+                    },
+                    {
+                        title: "Newton's Second Law",
+                        text: `F = m × a
+
+Where:
+• F = Force (Newtons)
+• m = Mass (kg)
+• a = Acceleration (m/s²)
+
+Example: 10 kg object accelerates at 5 m/s²
+Force = 10 × 5 = 50 N`
+                    },
+                    {
+                        title: "Newton's Third Law",
+                        text: `For every action, there is an equal and opposite reaction.
+
+Examples:
+• Rocket pushes gas down, gas pushes rocket up
+• You push wall, wall pushes you back
+• Gun recoils when bullet fires`
+                    }
+                ],
+                keyPoints: [
+                    "Force is measured in Newtons (N)",
+                    "First Law: Objects resist changes (inertia)",
+                    "Second Law: F = m × a",
+                    "Third Law: Action = Reaction"
+                ],
+                quiz: [
+                    { q: "SI unit of force is:", options: ["Joule", "Newton", "Pascal", "Watt"], answer: 1, explanation: "The SI unit of force is Newton (N)." },
+                    { q: "5 kg pushed with 20 N. Acceleration is:", options: ["2 m/s²", "4 m/s²", "25 m/s²", "100 m/s²"], answer: 1, explanation: "a = F/m = 20/5 = 4 m/s²" },
+                    { q: "Why are seatbelts important?", options: ["First Law", "Second Law", "Third Law", "Gravitation"], answer: 0, explanation: "First Law (Inertia) - body continues moving when car stops." }
+                ]
+            },
+            "gravity": {
+                id: "gravity",
+                title: "Gravitation",
+                subject: "Physics",
+                difficulty: "Intermediate",
+                duration: "18 min",
+                objectives: [
+                    "Understand Newton's Law of Gravitation",
+                    "Learn about acceleration due to gravity",
+                    "Differentiate between mass and weight"
+                ],
+                content: [
+                    {
+                        title: "Universal Law of Gravitation",
+                        text: `Every object attracts every other object with a force:
+
+F = G × (m₁ × m₂) / r²
+
+Where:
+• G = 6.67 × 10⁻¹¹ Nm²/kg²
+• m₁, m₂ = Masses of objects
+• r = Distance between centers`
+                    },
+                    {
+                        title: "Acceleration Due to Gravity",
+                        text: `On Earth's surface: g = 9.8 m/s²
+
+Variations:
+• Maximum at poles
+• Minimum at equator
+• Decreases with altitude
+• Decreases with depth`
+                    },
+                    {
+                        title: "Mass vs Weight",
+                        text: `Mass:
+• Amount of matter in an object
+• Constant everywhere
+• Unit: kilogram (kg)
+
+Weight = m × g
+• Gravitational force on object
+• Changes with location
+• Unit: Newton (N)
+
+Example: 60 kg person
+• On Earth: W = 60 × 9.8 = 588 N
+• On Moon: W = 60 × 1.6 = 96 N`
+                    }
+                ],
+                keyPoints: [
+                    "g ≈ 9.8 m/s² on Earth's surface",
+                    "Weight = mass × g",
+                    "Mass is constant; weight varies with location"
+                ],
+                quiz: [
+                    { q: "Value of g on Earth is:", options: ["9.8 m/s", "9.8 m/s²", "10 km/h", "6.67 m/s²"], answer: 1, explanation: "g = 9.8 m/s² (meters per second squared)" },
+                    { q: "Weight of 10 kg object (g=10):", options: ["10 N", "100 N", "1 N", "10 kg"], answer: 1, explanation: "W = mg = 10 × 10 = 100 N" }
+                ]
+            },
+            "energy": {
+                id: "energy",
+                title: "Work, Energy and Power",
+                subject: "Physics",
+                difficulty: "Intermediate",
+                duration: "22 min",
+                objectives: [
+                    "Understand scientific meaning of work",
+                    "Learn about kinetic and potential energy",
+                    "Calculate power"
+                ],
+                content: [
+                    {
+                        title: "What is Work?",
+                        text: `Work is done when force causes displacement.
+
+W = F × d
+
+Where:
+• W = Work (Joules)
+• F = Force (Newtons)
+• d = Displacement (meters)
+
+Work requires: Force + Movement in force direction`
+                    },
+                    {
+                        title: "Types of Energy",
+                        text: `Kinetic Energy: KE = ½mv²
+Energy of motion
+
+Potential Energy: PE = mgh
+Energy due to position
+
+Law of Conservation: Energy cannot be created or destroyed, only transformed.
+PE ↔ KE (transformation)`
+                    },
+                    {
+                        title: "Power",
+                        text: `Power = Work / Time
+
+P = W/t
+
+Units:
+• Watt (W) = 1 Joule/second
+• 1 kilowatt (kW) = 1000 W
+• 1 horsepower (HP) = 746 W`
+                    }
+                ],
+                keyPoints: [
+                    "Work = Force × Displacement (Joules)",
+                    "KE = ½mv², PE = mgh",
+                    "Power = Work/Time (Watts)"
+                ],
+                quiz: [
+                    { q: "SI unit of work is:", options: ["Newton", "Watt", "Joule", "Pascal"], answer: 2, explanation: "Work is measured in Joules (J)" },
+                    { q: "KE of 2 kg at 10 m/s:", options: ["20 J", "100 J", "50 J", "200 J"], answer: 1, explanation: "KE = ½mv² = ½×2×100 = 100 J" }
+                ]
+            },
+            "sound": {
+                id: "sound",
+                title: "Sound",
+                subject: "Physics",
+                difficulty: "Intermediate",
+                duration: "20 min",
+                objectives: [
+                    "Understand how sound is produced",
+                    "Learn about sound wave properties",
+                    "Explore speed of sound"
+                ],
+                content: [
+                    {
+                        title: "Production of Sound",
+                        text: `Sound is produced by vibrating objects.
+
+Examples:
+• Vocal cords vibrate to produce voice
+• Guitar strings vibrate to make music
+• Drum membrane vibrates when struck
+
+Important: Sound needs a medium to travel.
+It cannot travel through vacuum (space)!`
+                    },
+                    {
+                        title: "Sound Waves",
+                        text: `Sound travels as longitudinal waves.
+
+Compressions: High pressure regions (particles close)
+Rarefactions: Low pressure regions (particles far)
+
+Properties:
+• Wavelength (λ) - distance between waves
+• Frequency (Hz) - waves per second
+• Amplitude - determines loudness`
+                    },
+                    {
+                        title: "Speed of Sound",
+                        text: `v = f × λ (Speed = Frequency × Wavelength)
+
+Speed in different media:
+• Air: 343 m/s
+• Water: 1498 m/s
+• Steel: 5960 m/s
+
+Rule: Sound travels fastest in Solids > Liquids > Gases`
+                    }
+                ],
+                keyPoints: [
+                    "Sound needs a medium to travel",
+                    "Sound waves are longitudinal",
+                    "Speed: Solid > Liquid > Gas"
+                ],
+                quiz: [
+                    { q: "Sound waves are:", options: ["Transverse", "Longitudinal", "Electromagnetic", "Surface"], answer: 1, explanation: "Sound waves are longitudinal waves." },
+                    { q: "Sound travels fastest in:", options: ["Air", "Water", "Steel", "Vacuum"], answer: 2, explanation: "Sound travels fastest in solids like steel." }
+                ]
+            }
+        };
+
+        // ============ STATE MANAGEMENT ============
+        let state = {
+            completedLessons: [],
+            quizScores: [],
+            currentQuiz: null,
+            quizAnswers: {}
+        };
+
+        // Load state from localStorage
+        function loadState() {
+            const saved = localStorage.getItem('ailearn_progress');
+            if (saved) {
+                state = JSON.parse(saved);
             }
         }
-        
-        window.addEventListener('online', updateOnlineStatus);
-        window.addEventListener('offline', updateOnlineStatus);
-        updateOnlineStatus();
-        
-        // Register Service Worker for caching
+
+        // Save state to localStorage
+        function saveState() {
+            localStorage.setItem('ailearn_progress', JSON.stringify(state));
+            updateSidebarStats();
+        }
+
+        // ============ NAVIGATION ============
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            // Show selected page
+            document.getElementById('page-' + pageId).classList.add('active');
+            // Update nav buttons
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            const navBtn = document.getElementById('nav-' + pageId);
+            if (navBtn) navBtn.classList.add('active');
+
+            // Load page-specific content
+            if (pageId === 'lessons') renderLessonsList();
+            if (pageId === 'quiz') renderQuizSelect();
+            if (pageId === 'progress') renderProgress();
+        }
+
+        // ============ LESSONS ============
+        function renderLessonsList() {
+            const container = document.getElementById('lessons-list');
+            container.innerHTML = '';
+
+            Object.values(LESSONS).forEach(lesson => {
+                const completed = state.completedLessons.includes(lesson.id);
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => showLesson(lesson.id);
+                card.innerHTML = `
+                    <div class="card-header">
+                        <span class="card-title">${completed ? '✅' : '📖'} ${lesson.title}</span>
+                        <span class="card-badge">${lesson.difficulty}</span>
+                    </div>
+                    <div class="card-meta">${lesson.subject} • ${lesson.duration}</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function showLesson(lessonId) {
+            const lesson = LESSONS[lessonId];
+            if (!lesson) return;
+
+            const completed = state.completedLessons.includes(lessonId);
+            const container = document.getElementById('lesson-content');
+
+            container.innerHTML = `
+                <h1>${lesson.title}</h1>
+                <div class="lesson-header">
+                    <div class="lesson-meta">
+                        <div class="meta-label">Subject</div>
+                        <div class="meta-value">${lesson.subject}</div>
+                    </div>
+                    <div class="lesson-meta">
+                        <div class="meta-label">Difficulty</div>
+                        <div class="meta-value">${lesson.difficulty}</div>
+                    </div>
+                    <div class="lesson-meta">
+                        <div class="meta-label">Duration</div>
+                        <div class="meta-value">${lesson.duration}</div>
+                    </div>
+                    <div class="lesson-meta">
+                        <div class="meta-label">Status</div>
+                        <div class="meta-value">${completed ? '✅ Done' : '📖 In Progress'}</div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>🎯 Learning Objectives</h3>
+                    <ul style="padding-left: 20px; line-height: 2;">
+                        ${lesson.objectives.map(o => `<li>${o}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                ${lesson.content.map(section => `
+                    <div class="section">
+                        <h3>${section.title}</h3>
+                        <p>${section.text}</p>
+                    </div>
+                `).join('')}
+                
+                <div class="key-points">
+                    <h3 style="margin-bottom: 15px;">📌 Key Points to Remember</h3>
+                    ${lesson.keyPoints.map(p => `<div class="key-point">✓ ${p}</div>`).join('')}
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="markComplete('${lessonId}')">✅ Mark Complete</button>
+                    <button class="btn btn-secondary" onclick="startQuizFor('${lessonId}')">📝 Take Quiz</button>
+                </div>
+            `;
+
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-lesson-detail').classList.add('active');
+        }
+
+        function markComplete(lessonId) {
+            if (!state.completedLessons.includes(lessonId)) {
+                state.completedLessons.push(lessonId);
+                saveState();
+            }
+            showLesson(lessonId); // Refresh to show updated status
+            alert('🎉 Lesson marked as complete!');
+        }
+
+        // ============ QUIZ ============
+        function renderQuizSelect() {
+            const select = document.getElementById('quiz-topic');
+            select.innerHTML = Object.values(LESSONS).map(l =>
+                `<option value="${l.id}">${l.title}</option>`
+            ).join('');
+
+            renderQuizHistory();
+        }
+
+        function renderQuizHistory() {
+            const container = document.getElementById('quiz-history');
+            if (state.quizScores.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted);">No quiz history yet. Take a quiz to see your scores!</p>';
+                return;
+            }
+
+            container.innerHTML = state.quizScores.slice(-5).reverse().map(score => {
+                const lesson = LESSONS[score.lessonId];
+                const emoji = score.percent >= 80 ? '🟢' : score.percent >= 60 ? '🟡' : '🔴';
+                return `<div style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    ${emoji} <strong>${lesson ? lesson.title : score.lessonId}</strong>: ${score.percent}%
+                </div>`;
+            }).join('');
+        }
+
+        function startQuiz() {
+            const lessonId = document.getElementById('quiz-topic').value;
+            startQuizFor(lessonId);
+        }
+
+        function startQuizFor(lessonId) {
+            const lesson = LESSONS[lessonId];
+            if (!lesson) return;
+
+            state.currentQuiz = lessonId;
+            state.quizAnswers = {};
+
+            document.getElementById('quiz-title').textContent = `📝 Quiz: ${lesson.title}`;
+
+            const container = document.getElementById('quiz-questions');
+            container.innerHTML = lesson.quiz.map((q, i) => `
+                <div class="quiz-question" id="question-${i}">
+                    <div class="question-text"><strong>Q${i + 1}.</strong> ${q.q}</div>
+                    ${q.options.map((opt, j) => `
+                        <button class="quiz-option" onclick="selectAnswer(${i}, ${j})" id="opt-${i}-${j}">${opt}</button>
+                    `).join('')}
+                    <div class="feedback" id="feedback-${i}"></div>
+                </div>
+            `).join('');
+
+            document.getElementById('submit-quiz').style.display = 'block';
+            updateQuizProgress();
+
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-quiz-active').classList.add('active');
+        }
+
+        function selectAnswer(questionIdx, optionIdx) {
+            state.quizAnswers[questionIdx] = optionIdx;
+
+            // Update UI
+            const lesson = LESSONS[state.currentQuiz];
+            lesson.quiz[questionIdx].options.forEach((_, j) => {
+                document.getElementById(`opt-${questionIdx}-${j}`).classList.remove('selected');
+            });
+            document.getElementById(`opt-${questionIdx}-${optionIdx}`).classList.add('selected');
+
+            updateQuizProgress();
+        }
+
+        function updateQuizProgress() {
+            const lesson = LESSONS[state.currentQuiz];
+            const answered = Object.keys(state.quizAnswers).length;
+            const total = lesson.quiz.length;
+            const percent = (answered / total) * 100;
+            document.getElementById('quiz-progress').style.width = percent + '%';
+        }
+
+        function submitQuiz() {
+            const lesson = LESSONS[state.currentQuiz];
+            let correct = 0;
+
+            lesson.quiz.forEach((q, i) => {
+                const userAnswer = state.quizAnswers[i];
+                const isCorrect = userAnswer === q.answer;
+                if (isCorrect) correct++;
+
+                // Show feedback
+                q.options.forEach((_, j) => {
+                    const btn = document.getElementById(`opt-${i}-${j}`);
+                    btn.classList.remove('selected');
+                    if (j === q.answer) btn.classList.add('correct');
+                    else if (j === userAnswer && !isCorrect) btn.classList.add('incorrect');
+                });
+
+                const feedback = document.getElementById(`feedback-${i}`);
+                feedback.className = `feedback show ${isCorrect ? 'correct' : 'incorrect'}`;
+                feedback.innerHTML = `${isCorrect ? '✅ Correct!' : '❌ Incorrect.'} ${q.explanation}`;
+            });
+
+            const percent = Math.round((correct / lesson.quiz.length) * 100);
+
+            // Save score
+            state.quizScores.push({
+                lessonId: state.currentQuiz,
+                correct: correct,
+                total: lesson.quiz.length,
+                percent: percent
+            });
+            saveState();
+
+            // Show results after delay
+            setTimeout(() => {
+                document.getElementById('result-score').textContent = percent + '%';
+                document.getElementById('result-message').textContent =
+                    percent >= 80 ? '🎉 Excellent work!' :
+                        percent >= 60 ? '👍 Good job!' : '📚 Keep practicing!';
+
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById('page-quiz-results').classList.add('active');
+            }, 1500);
+
+            document.getElementById('submit-quiz').style.display = 'none';
+        }
+
+        function retryQuiz() {
+            startQuizFor(state.currentQuiz);
+        }
+
+        // ============ PROGRESS ============
+        function renderProgress() {
+            const totalLessons = Object.keys(LESSONS).length;
+            const completedCount = state.completedLessons.length;
+
+            document.getElementById('progress-lessons').textContent = `${completedCount}/${totalLessons}`;
+            document.getElementById('progress-quizzes').textContent = state.quizScores.length;
+
+            if (state.quizScores.length > 0) {
+                const avg = state.quizScores.reduce((sum, s) => sum + s.percent, 0) / state.quizScores.length;
+                document.getElementById('progress-avg').textContent = Math.round(avg) + '%';
+            }
+
+            // Lesson progress bar
+            document.getElementById('lesson-progress-bar').style.width = (completedCount / totalLessons * 100) + '%';
+
+            // Lesson list
+            document.getElementById('lesson-progress-list').innerHTML = Object.values(LESSONS).map(lesson => {
+                const done = state.completedLessons.includes(lesson.id);
+                return `<div style="padding: 8px 0;">${done ? '✅' : '⬜'} ${done ? `<s>${lesson.title}</s>` : lesson.title}</div>`;
+            }).join('');
+
+            // Quiz history
+            const historyContainer = document.getElementById('progress-quiz-history');
+            if (state.quizScores.length === 0) {
+                historyContainer.innerHTML = '<p style="color: var(--text-muted);">Take a quiz to see your scores here!</p>';
+            } else {
+                historyContainer.innerHTML = state.quizScores.slice(-5).reverse().map(score => {
+                    const lesson = LESSONS[score.lessonId];
+                    const emoji = score.percent >= 80 ? '🟢' : score.percent >= 60 ? '🟡' : '🔴';
+                    return `<div style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        ${emoji} <strong>${lesson ? lesson.title : score.lessonId}</strong>: ${score.correct}/${score.total} (${score.percent}%)
+                    </div>`;
+                }).join('');
+            }
+        }
+
+        function updateSidebarStats() {
+            const totalLessons = Object.keys(LESSONS).length;
+            document.getElementById('sidebar-lessons').textContent = `${state.completedLessons.length}/${totalLessons}`;
+
+            if (state.quizScores.length > 0) {
+                const avg = state.quizScores.reduce((sum, s) => sum + s.percent, 0) / state.quizScores.length;
+                document.getElementById('sidebar-score').textContent = Math.round(avg) + '%';
+            }
+        }
+
+        // ============ OFFLINE DETECTION ============
+        function updateOnlineStatus() {
+            const banner = document.getElementById('offlineBanner');
+            if (navigator.onLine) {
+                banner.classList.remove('show');
+            } else {
+                banner.classList.add('show');
+            }
+        }
+
+        // ============ SERVICE WORKER ============
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js')
                 .then(reg => console.log('SW registered'))
                 .catch(err => console.log('SW failed:', err));
         }
-        
-        // Mount stlite app
-        stlite.mount({
-            requirements: ["plotly", "networkx"],
-            entrypoint: "app.py",
-            files: {
-                "app.py": `
-import streamlit as st
-import json
-from datetime import datetime
 
-# ============ Page Config ============
-st.set_page_config(
-    page_title="AI Learning Platform",
-    page_icon="📚",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+        // ============ INIT ============
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
 
-# ============ Session State Init ============
-if "progress" not in st.session_state:
-    st.session_state.progress = {
-        "lessons_completed": [],
-        "quiz_scores": [],
-        "achievements": []
-    }
-
-if "page" not in st.session_state:
-    st.session_state.page = "lessons"
-
-if "current_lesson" not in st.session_state:
-    st.session_state.current_lesson = None
-
-if "quiz_state" not in st.session_state:
-    st.session_state.quiz_state = {"active": False, "answers": {}, "submitted": False}
-
-# ============ Lesson Data ============
-LESSONS = {
-    "motion": {
-        "id": "motion",
-        "title": "Motion and Speed",
-        "subject": "Physics",
-        "difficulty": "Beginner",
-        "duration": "15 min",
-        "objectives": [
-            "Understand what motion means in physics",
-            "Differentiate between distance and displacement",
-            "Calculate speed and velocity"
-        ],
-        "content": [
-            {
-                "title": "What is Motion?",
-                "text": """Motion is the change in position of an object with respect to time.
-                
-**Examples:**
-- A car moving on a road
-- A bird flying in the sky
-- Earth revolving around the Sun
-
-Motion is always relative - a person sitting in a moving bus is at rest relative to the bus but in motion relative to the ground."""
-            },
-            {
-                "title": "Distance vs Displacement",
-                "text": """**Distance** = Total path length traveled (scalar)
-                
-**Displacement** = Shortest path between start and end (vector)
-
-**Example:** Walking 3 km east then 4 km north:
-- Distance = 7 km
-- Displacement = 5 km (Pythagorean theorem)"""
-            },
-            {
-                "title": "Speed and Velocity",
-                "text": """**Speed = Distance / Time** (scalar)
-
-**Velocity = Displacement / Time** (vector)
-
-Units: m/s or km/h
-
-**Example:** A car travels 100 km in 2 hours
-Speed = 100/2 = 50 km/h"""
-            }
-        ],
-        "key_points": [
-            "Motion is change in position over time",
-            "Distance is scalar; displacement is vector",
-            "Speed is scalar; velocity is vector"
-        ],
-        "quiz": [
-            {
-                "q": "What is the SI unit of speed?",
-                "options": ["km/h", "m/s", "cm/s", "mph"],
-                "answer": 1,
-                "explanation": "The SI unit of speed is meters per second (m/s)."
-            },
-            {
-                "q": "A car travels 150 km in 3 hours. What is its average speed?",
-                "options": ["30 km/h", "40 km/h", "50 km/h", "60 km/h"],
-                "answer": 2,
-                "explanation": "Speed = Distance/Time = 150/3 = 50 km/h"
-            },
-            {
-                "q": "Which quantity has both magnitude and direction?",
-                "options": ["Distance", "Speed", "Displacement", "Time"],
-                "answer": 2,
-                "explanation": "Displacement is a vector quantity with both magnitude and direction."
-            },
-            {
-                "q": "If you walk in a circle back to start, displacement is:",
-                "options": ["Equal to distance", "Half the distance", "Zero", "Cannot determine"],
-                "answer": 2,
-                "explanation": "Displacement is zero because start and end positions are the same."
-            }
-        ]
-    },
-    "force": {
-        "id": "force",
-        "title": "Force and Laws of Motion",
-        "subject": "Physics",
-        "difficulty": "Intermediate",
-        "duration": "20 min",
-        "objectives": [
-            "Understand the concept of force",
-            "Learn Newton's three laws of motion",
-            "Apply laws to solve problems"
-        ],
-        "content": [
-            {
-                "title": "What is Force?",
-                "text": """Force is a push or pull that can change an object's motion.
-
-**Effects of force:**
-- Start or stop motion
-- Change speed
-- Change direction
-- Change shape
-
-**Unit:** Newton (N)"""
-            },
-            {
-                "title": "Newton's First Law (Inertia)",
-                "text": """An object at rest stays at rest, and an object in motion stays in motion with the same speed and direction, unless acted upon by an unbalanced force.
-
-**Examples:**
-- Passengers lurch forward when bus stops
-- Ball keeps rolling until friction stops it"""
-            },
-            {
-                "title": "Newton's Second Law",
-                "text": """**F = m × a**
-
-Where:
-- F = Force (Newtons)
-- m = Mass (kg)
-- a = Acceleration (m/s²)
-
-**Example:** 10 kg object accelerates at 5 m/s²
-Force = 10 × 5 = 50 N"""
-            },
-            {
-                "title": "Newton's Third Law",
-                "text": """For every action, there is an equal and opposite reaction.
-
-**Examples:**
-- Rocket pushes gas down, gas pushes rocket up
-- You push wall, wall pushes you back
-- Gun recoils when bullet fires"""
-            }
-        ],
-        "key_points": [
-            "Force is measured in Newtons",
-            "First Law: Objects resist changes (inertia)",
-            "Second Law: F = m × a",
-            "Third Law: Action = Reaction"
-        ],
-        "quiz": [
-            {
-                "q": "What is the SI unit of force?",
-                "options": ["Joule", "Newton", "Pascal", "Watt"],
-                "answer": 1,
-                "explanation": "The SI unit of force is Newton (N)."
-            },
-            {
-                "q": "A 5 kg object is pushed with 20 N force. Acceleration is:",
-                "options": ["2 m/s²", "4 m/s²", "25 m/s²", "100 m/s²"],
-                "answer": 1,
-                "explanation": "a = F/m = 20/5 = 4 m/s²"
-            },
-            {
-                "q": "Which law explains why seatbelts are important?",
-                "options": ["First Law", "Second Law", "Third Law", "Gravitation"],
-                "answer": 0,
-                "explanation": "First Law (Inertia) - body continues moving when car stops."
-            }
-        ]
-    },
-    "gravity": {
-        "id": "gravity",
-        "title": "Gravitation",
-        "subject": "Physics",
-        "difficulty": "Intermediate",
-        "duration": "18 min",
-        "objectives": [
-            "Understand Newton's Law of Gravitation",
-            "Learn about acceleration due to gravity",
-            "Differentiate between mass and weight"
-        ],
-        "content": [
-            {
-                "title": "Universal Law of Gravitation",
-                "text": """Every object attracts every other object with a force:
-
-**F = G × (m₁ × m₂) / r²**
-
-Where:
-- G = 6.67 × 10⁻¹¹ Nm²/kg²
-- m₁, m₂ = Masses
-- r = Distance between centers"""
-            },
-            {
-                "title": "Acceleration Due to Gravity",
-                "text": """On Earth's surface: **g = 9.8 m/s²**
-
-**Variations:**
-- Maximum at poles
-- Minimum at equator
-- Decreases with altitude
-- Decreases with depth"""
-            },
-            {
-                "title": "Mass vs Weight",
-                "text": """**Mass:**
-- Amount of matter
-- Constant everywhere
-- Unit: kg
-
-**Weight = m × g**
-- Gravitational force
-- Changes with location
-- Unit: Newton
-
-Example: 60 kg person
-- Earth weight: 60 × 9.8 = 588 N
-- Moon weight: 60 × 1.6 = 96 N"""
-            }
-        ],
-        "key_points": [
-            "g ≈ 9.8 m/s² on Earth",
-            "Weight = mass × g",
-            "Mass is constant; weight varies"
-        ],
-        "quiz": [
-            {
-                "q": "Value of g on Earth is approximately:",
-                "options": ["9.8 m/s", "9.8 m/s²", "10 km/h", "6.67 m/s²"],
-                "answer": 1,
-                "explanation": "g = 9.8 m/s² (meters per second squared)"
-            },
-            {
-                "q": "Weight of 10 kg object on Earth (g=10):",
-                "options": ["10 N", "100 N", "1 N", "10 kg"],
-                "answer": 1,
-                "explanation": "W = mg = 10 × 10 = 100 N"
-            }
-        ]
-    },
-    "energy": {
-        "id": "energy",
-        "title": "Work, Energy and Power",
-        "subject": "Physics",
-        "difficulty": "Intermediate",
-        "duration": "22 min",
-        "objectives": [
-            "Understand scientific meaning of work",
-            "Learn about kinetic and potential energy",
-            "Calculate power"
-        ],
-        "content": [
-            {
-                "title": "What is Work?",
-                "text": """Work is done when force causes displacement.
-
-**W = F × d**
-
-Where:
-- W = Work (Joules)
-- F = Force (Newtons)
-- d = Displacement (meters)
-
-Work requires: Force + Movement in force direction"""
-            },
-            {
-                "title": "Types of Energy",
-                "text": """**Kinetic Energy:** KE = ½mv²
-Energy of motion
-
-**Potential Energy:** PE = mgh
-Energy due to position
-
-**Conservation:** Total energy remains constant
-PE ↔ KE (transformation)"""
-            },
-            {
-                "title": "Power",
-                "text": """Power = Work / Time
-
-**P = W/t**
-
-Units:
-- Watt (W) = 1 J/s
-- 1 kW = 1000 W
-- 1 HP = 746 W"""
-            }
-        ],
-        "key_points": [
-            "Work = Force × Displacement",
-            "KE = ½mv², PE = mgh",
-            "Power = Work/Time (Watts)"
-        ],
-        "quiz": [
-            {
-                "q": "SI unit of work is:",
-                "options": ["Newton", "Watt", "Joule", "Pascal"],
-                "answer": 2,
-                "explanation": "Work is measured in Joules (J)"
-            },
-            {
-                "q": "KE of 2 kg ball moving at 10 m/s:",
-                "options": ["20 J", "100 J", "50 J", "200 J"],
-                "answer": 1,
-                "explanation": "KE = ½mv² = ½×2×100 = 100 J"
-            }
-        ]
-    },
-    "sound": {
-        "id": "sound",
-        "title": "Sound",
-        "subject": "Physics",
-        "difficulty": "Intermediate",
-        "duration": "20 min",
-        "objectives": [
-            "Understand how sound is produced",
-            "Learn about sound wave properties",
-            "Explore speed of sound"
-        ],
-        "content": [
-            {
-                "title": "Production of Sound",
-                "text": """Sound is produced by vibrating objects.
-
-**Examples:**
-- Vocal cords vibrate
-- Guitar strings vibrate
-- Drum membrane vibrates
-
-**Important:** Sound needs a medium to travel.
-Cannot travel through vacuum!"""
-            },
-            {
-                "title": "Sound Waves",
-                "text": """Sound travels as **longitudinal waves**.
-
-**Compressions:** High pressure regions
-**Rarefactions:** Low pressure regions
-
-**Properties:**
-- Wavelength (λ)
-- Frequency (Hz)
-- Amplitude (loudness)"""
-            },
-            {
-                "title": "Speed of Sound",
-                "text": """**v = f × λ**
-
-Speed in different media:
-- Air: 343 m/s
-- Water: 1498 m/s
-- Steel: 5960 m/s
-
-**Rule:** Solid > Liquid > Gas"""
-            }
-        ],
-        "key_points": [
-            "Sound needs a medium",
-            "Longitudinal waves",
-            "Speed: Solid > Liquid > Gas"
-        ],
-        "quiz": [
-            {
-                "q": "Sound waves are:",
-                "options": ["Transverse", "Longitudinal", "Electromagnetic", "Surface"],
-                "answer": 1,
-                "explanation": "Sound waves are longitudinal waves."
-            },
-            {
-                "q": "Sound travels fastest in:",
-                "options": ["Air", "Water", "Steel", "Vacuum"],
-                "answer": 2,
-                "explanation": "Sound travels fastest in solids like steel."
-            }
-        ]
-    }
-}
-
-# ============ Helper Functions ============
-def save_progress():
-    """Progress is automatically saved in session state"""
-    pass
-
-def mark_complete(lesson_id):
-    if lesson_id not in st.session_state.progress["lessons_completed"]:
-        st.session_state.progress["lessons_completed"].append(lesson_id)
-
-def record_quiz_score(lesson_id, score, total):
-    st.session_state.progress["quiz_scores"].append({
-        "lesson": lesson_id,
-        "score": score,
-        "total": total,
-        "percent": round(score/total*100)
-    })
-
-# ============ Sidebar ============
-with st.sidebar:
-    st.markdown("# 📚 AI Learn")
-    st.markdown("*Offline Learning Platform*")
-    st.divider()
-    
-    if st.button("📖 Lessons", use_container_width=True, 
-                type="primary" if st.session_state.page == "lessons" else "secondary"):
-        st.session_state.page = "lessons"
-        st.session_state.current_lesson = None
-        st.session_state.quiz_state = {"active": False, "answers": {}, "submitted": False}
-        st.rerun()
-    
-    if st.button("📝 Quiz", use_container_width=True,
-                type="primary" if st.session_state.page == "quiz" else "secondary"):
-        st.session_state.page = "quiz"
-        st.session_state.quiz_state = {"active": False, "answers": {}, "submitted": False}
-        st.rerun()
-    
-    if st.button("📊 Progress", use_container_width=True,
-                type="primary" if st.session_state.page == "progress" else "secondary"):
-        st.session_state.page = "progress"
-        st.rerun()
-    
-    st.divider()
-    
-    # Quick stats
-    completed = len(st.session_state.progress["lessons_completed"])
-    total_lessons = len(LESSONS)
-    st.metric("Lessons Done", f"{completed}/{total_lessons}")
-    
-    scores = st.session_state.progress["quiz_scores"]
-    if scores:
-        avg = sum(s["percent"] for s in scores) / len(scores)
-        st.metric("Avg Score", f"{avg:.0f}%")
-    else:
-        st.metric("Avg Score", "N/A")
-    
-    st.divider()
-    st.success("🌐 Works Offline!")
-
-# ============ Main Content ============
-
-# LESSONS PAGE
-if st.session_state.page == "lessons":
-    if st.session_state.current_lesson:
-        lesson = LESSONS[st.session_state.current_lesson]
-        
-        if st.button("← Back to Lessons"):
-            st.session_state.current_lesson = None
-            st.rerun()
-        
-        st.title(lesson["title"])
-        
-        cols = st.columns(4)
-        cols[0].metric("Subject", lesson["subject"])
-        cols[1].metric("Difficulty", lesson["difficulty"])
-        cols[2].metric("Duration", lesson["duration"])
-        is_done = lesson["id"] in st.session_state.progress["lessons_completed"]
-        cols[3].metric("Status", "✅ Done" if is_done else "📖 In Progress")
-        
-        st.divider()
-        
-        with st.expander("🎯 Learning Objectives", expanded=True):
-            for obj in lesson["objectives"]:
-                st.markdown(f"• {obj}")
-        
-        st.divider()
-        
-        for section in lesson["content"]:
-            st.subheader(section["title"])
-            st.markdown(section["text"])
-            st.write("")
-        
-        st.divider()
-        st.subheader("📌 Key Points")
-        for point in lesson["key_points"]:
-            st.success(f"✓ {point}")
-        
-        st.divider()
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("✅ Mark Complete", use_container_width=True):
-                mark_complete(lesson["id"])
-                st.balloons()
-                st.rerun()
-        with col2:
-            if st.button("📝 Take Quiz", use_container_width=True):
-                st.session_state.page = "quiz"
-                st.session_state.quiz_state = {
-                    "active": True,
-                    "lesson": lesson["id"],
-                    "answers": {},
-                    "submitted": False
-                }
-                st.rerun()
-    else:
-        st.title("📖 Available Lessons")
-        st.markdown("Select a lesson to start learning!")
-        
-        completed_ids = st.session_state.progress["lessons_completed"]
-        
-        for lid, lesson in LESSONS.items():
-            is_done = lid in completed_ids
-            emoji = "✅" if is_done else "📖"
-            
-            col1, col2 = st.columns([4, 1])
-            with col1:
-                if st.button(f"{emoji} {lesson['title']}", key=lid, use_container_width=True):
-                    st.session_state.current_lesson = lid
-                    st.rerun()
-            with col2:
-                st.caption(f"{lesson['difficulty']} • {lesson['duration']}")
-
-# QUIZ PAGE
-elif st.session_state.page == "quiz":
-    if st.session_state.quiz_state.get("active"):
-        lesson_id = st.session_state.quiz_state["lesson"]
-        lesson = LESSONS[lesson_id]
-        questions = lesson["quiz"]
-        
-        st.title(f"📝 Quiz: {lesson['title']}")
-        st.markdown(f"**{len(questions)} questions** • Answer all and submit")
-        st.divider()
-        
-        for i, q in enumerate(questions):
-            st.markdown(f"**Q{i+1}.** {q['q']}")
-            key = f"q_{i}"
-            selected = st.radio(
-                "Select answer:",
-                options=q["options"],
-                key=key,
-                index=None,
-                label_visibility="collapsed"
-            )
-            if selected:
-                st.session_state.quiz_state["answers"][i] = q["options"].index(selected)
-            
-            if st.session_state.quiz_state["submitted"]:
-                user_ans = st.session_state.quiz_state["answers"].get(i, -1)
-                if user_ans == q["answer"]:
-                    st.success("✅ Correct!")
-                else:
-                    st.error(f"❌ Incorrect. Answer: {q['options'][q['answer']]}")
-                st.info(f"💡 {q['explanation']}")
-            st.write("")
-        
-        st.divider()
-        
-        if not st.session_state.quiz_state["submitted"]:
-            answered = len(st.session_state.quiz_state["answers"])
-            st.progress(answered/len(questions), text=f"{answered}/{len(questions)} answered")
-            
-            if st.button("Submit Quiz", type="primary", use_container_width=True):
-                st.session_state.quiz_state["submitted"] = True
-                
-                # Calculate score
-                correct = 0
-                for i, q in enumerate(questions):
-                    if st.session_state.quiz_state["answers"].get(i) == q["answer"]:
-                        correct += 1
-                
-                record_quiz_score(lesson_id, correct, len(questions))
-                st.rerun()
-        else:
-            scores = st.session_state.progress["quiz_scores"]
-            if scores:
-                last = scores[-1]
-                pct = last["percent"]
-                if pct >= 80:
-                    st.balloons()
-                    st.success(f"🎉 Excellent! Score: {pct}%")
-                elif pct >= 60:
-                    st.info(f"👍 Good job! Score: {pct}%")
-                else:
-                    st.warning(f"📚 Keep practicing! Score: {pct}%")
-            
-            if st.button("🔄 Try Again", use_container_width=True):
-                st.session_state.quiz_state = {
-                    "active": True,
-                    "lesson": lesson_id,
-                    "answers": {},
-                    "submitted": False
-                }
-                st.rerun()
-            
-            if st.button("📚 Back to Lessons", use_container_width=True):
-                st.session_state.page = "lessons"
-                st.session_state.quiz_state = {"active": False}
-                st.rerun()
-    else:
-        st.title("📝 Practice Quiz")
-        st.markdown("Test your knowledge!")
-        
-        lesson_options = {l["title"]: lid for lid, l in LESSONS.items()}
-        selected = st.selectbox("Select a topic:", list(lesson_options.keys()))
-        
-        if st.button("🚀 Start Quiz", type="primary", use_container_width=True):
-            st.session_state.quiz_state = {
-                "active": True,
-                "lesson": lesson_options[selected],
-                "answers": {},
-                "submitted": False
-            }
-            st.rerun()
-        
-        st.divider()
-        st.subheader("📊 Quiz History")
-        scores = st.session_state.progress["quiz_scores"]
-        if scores:
-            for s in reversed(scores[-5:]):
-                lesson_title = LESSONS.get(s["lesson"], {}).get("title", s["lesson"])
-                emoji = "🟢" if s["percent"] >= 80 else "🟡" if s["percent"] >= 60 else "🔴"
-                st.markdown(f"{emoji} **{lesson_title}**: {s['percent']}%")
-        else:
-            st.info("No quiz history yet!")
-
-# PROGRESS PAGE
-elif st.session_state.page == "progress":
-    st.title("📊 Your Progress")
-    
-    completed = len(st.session_state.progress["lessons_completed"])
-    total = len(LESSONS)
-    scores = st.session_state.progress["quiz_scores"]
-    
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("📚 Lessons", f"{completed}/{total}", f"{completed/total*100:.0f}%")
-    with col2:
-        st.metric("📝 Quizzes", len(scores))
-    with col3:
-        if scores:
-            avg = sum(s["percent"] for s in scores) / len(scores)
-            st.metric("🎯 Avg Score", f"{avg:.0f}%")
-        else:
-            st.metric("🎯 Avg Score", "N/A")
-    
-    st.divider()
-    
-    st.subheader("📚 Lesson Progress")
-    st.progress(completed/total if total > 0 else 0)
-    
-    for lid, lesson in LESSONS.items():
-        is_done = lid in st.session_state.progress["lessons_completed"]
-        if is_done:
-            st.markdown(f"✅ ~~{lesson['title']}~~")
-        else:
-            st.markdown(f"⬜ {lesson['title']}")
-    
-    st.divider()
-    
-    st.subheader("📝 Recent Quiz Scores")
-    if scores:
-        for s in reversed(scores[-5:]):
-            lesson_title = LESSONS.get(s["lesson"], {}).get("title", s["lesson"])
-            emoji = "🟢" if s["percent"] >= 80 else "🟡" if s["percent"] >= 60 else "🔴"
-            st.markdown(f"{emoji} **{lesson_title}**: {s['score']}/{s['total']} ({s['percent']}%)")
-    else:
-        st.info("Take a quiz to see your scores here!")
-`
-            },
-            mountTarget: document.getElementById("root"),
-            onProgress: (progress) => {
-                const loading = document.getElementById('loading');
-                if (progress && progress.message) {
-                    const subtitle = loading.querySelector('.loading-subtitle');
-                    if (subtitle) {
-                        subtitle.textContent = progress.message;
-                    }
-                }
-            }
-        }).then(() => {
-            document.getElementById('loading').style.display = 'none';
-        });
+        loadState();
+        updateSidebarStats();
+        renderLessonsList();
+        updateOnlineStatus();
     </script>
 </body>
+
 </html>
