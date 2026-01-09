@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="64" fill="#1a1a2e"/>
+  <circle cx="256" cy="186" r="93" fill="#6c63ff"/>
+  <path d="M133 373 Q256 266 379 373 L379 453 Q256 400 133 453 Z" fill="#6c63ff"/>
+  <circle cx="213" cy="173" r="13" fill="white"/>
+  <circle cx="299" cy="173" r="13" fill="white"/>
+  <path d="M213 226 Q256 266 299 226" stroke="white" stroke-width="10" fill="none"/>
+  <text x="256" y="490" text-anchor="middle" fill="white" font-size="48" font-family="Arial" font-weight="bold">AI Learn</text>
+</svg>

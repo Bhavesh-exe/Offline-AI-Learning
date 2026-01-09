@@ -1,0 +1,99 @@
+{
+    "id": "physics_01",
+    "title": "Motion and Speed",
+    "subject": "Physics",
+    "order": 1,
+    "difficulty": "beginner",
+    "estimated_time_minutes": 15,
+    "learning_objectives": [
+        "Understand what motion means in physics",
+        "Differentiate between distance and displacement",
+        "Calculate speed and velocity",
+        "Understand uniform and non-uniform motion"
+    ],
+    "content": {
+        "sections": [
+            {
+                "title": "What is Motion?",
+                "type": "text",
+                "content": "Motion is the change in position of an object with respect to time. When an object changes its position relative to a reference point, we say the object is in motion.\n\nFor example:\n• A car moving on a road\n• A bird flying in the sky\n• Earth revolving around the Sun\n\nMotion is always relative. A person sitting in a moving bus is at rest relative to the bus but in motion relative to the ground."
+            },
+            {
+                "title": "Distance vs Displacement",
+                "type": "text",
+                "content": "**Distance** is the total path length traveled by an object. It is a scalar quantity (has only magnitude).\n\n**Displacement** is the shortest distance between the initial and final positions. It is a vector quantity (has both magnitude and direction).\n\n**Example:** If you walk 3 km east and then 4 km north:\n• Distance = 3 + 4 = 7 km\n• Displacement = 5 km (using Pythagoras theorem)"
+            },
+            {
+                "title": "Speed and Velocity",
+                "type": "text",
+                "content": "**Speed** = Distance / Time\n\nSpeed tells us how fast an object is moving. It is measured in meters per second (m/s) or kilometers per hour (km/h).\n\n**Velocity** = Displacement / Time\n\nVelocity tells us how fast and in which direction an object is moving.\n\n**Example:** A car travels 100 km in 2 hours.\nSpeed = 100 km / 2 h = 50 km/h"
+            },
+            {
+                "title": "Types of Motion",
+                "type": "text",
+                "content": "**Uniform Motion:** When an object covers equal distances in equal intervals of time.\nExample: A car moving at constant 60 km/h on a highway.\n\n**Non-uniform Motion:** When an object covers unequal distances in equal intervals of time.\nExample: A car in city traffic, stopping and starting."
+            },
+            {
+                "title": "Key Formulas",
+                "type": "formula",
+                "content": "Speed = Distance / Time\n\nVelocity = Displacement / Time\n\nAverage Speed = Total Distance / Total Time\n\nAverage Velocity = Total Displacement / Total Time"
+            }
+        ]
+    },
+    "key_points": [
+        "Motion is the change in position with respect to time",
+        "Distance is total path length; displacement is shortest path",
+        "Speed is a scalar; velocity is a vector",
+        "Uniform motion has constant speed; non-uniform has varying speed"
+    ],
+    "quiz_questions": [
+        {
+            "question": "What is the SI unit of speed?",
+            "type": "mcq",
+            "options": [
+                "km/h",
+                "m/s",
+                "cm/s",
+                "miles/h"
+            ],
+            "correct": 1,
+            "explanation": "The SI unit of speed is meters per second (m/s)."
+        },
+        {
+            "question": "A car travels 150 km in 3 hours. What is its average speed?",
+            "type": "mcq",
+            "options": [
+                "30 km/h",
+                "40 km/h",
+                "50 km/h",
+                "60 km/h"
+            ],
+            "correct": 2,
+            "explanation": "Average Speed = 150 km / 3 h = 50 km/h"
+        },
+        {
+            "question": "Which quantity has both magnitude and direction?",
+            "type": "mcq",
+            "options": [
+                "Distance",
+                "Speed",
+                "Displacement",
+                "Time"
+            ],
+            "correct": 2,
+            "explanation": "Displacement is a vector quantity with both magnitude and direction."
+        },
+        {
+            "question": "If you walk in a complete circle back to your starting point, what is your displacement?",
+            "type": "mcq",
+            "options": [
+                "Equal to distance",
+                "Half the distance",
+                "Zero",
+                "Cannot be determined"
+            ],
+            "correct": 2,
+            "explanation": "Displacement is zero because the initial and final positions are the same."
+        }
+    ]
+}

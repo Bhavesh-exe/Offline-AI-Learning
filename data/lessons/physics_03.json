@@ -1,0 +1,95 @@
+{
+    "id": "physics_03",
+    "title": "Gravitation",
+    "subject": "Physics",
+    "order": 3,
+    "difficulty": "intermediate",
+    "estimated_time_minutes": 18,
+    "learning_objectives": [
+        "Understand Newton's Law of Gravitation",
+        "Learn about acceleration due to gravity",
+        "Differentiate between mass and weight",
+        "Understand free fall motion"
+    ],
+    "content": {
+        "sections": [
+            {
+                "title": "Universal Law of Gravitation",
+                "type": "text",
+                "content": "**Newton's Law of Universal Gravitation:** Every object in the universe attracts every other object with a force that is:\n• Directly proportional to the product of their masses\n• Inversely proportional to the square of the distance between them\n\n**Formula:** F = G × (m₁ × m₂) / r²\n\nWhere:\n• F = Gravitational force\n• G = Gravitational constant (6.67 × 10⁻¹¹ Nm²/kg²)\n• m₁, m₂ = Masses of the objects\n• r = Distance between the centers of the objects"
+            },
+            {
+                "title": "Acceleration Due to Gravity (g)",
+                "type": "text",
+                "content": "**Acceleration due to gravity (g)** is the acceleration experienced by an object falling freely under gravity.\n\n**Value:** g = 9.8 m/s² (approximately 10 m/s²)\n\n**Formula:** g = G × M / R²\n\nWhere:\n• M = Mass of Earth\n• R = Radius of Earth\n\n**Note:** The value of g varies:\n• At poles: g is maximum\n• At equator: g is minimum\n• With altitude: g decreases\n• With depth: g decreases"
+            },
+            {
+                "title": "Mass vs Weight",
+                "type": "text",
+                "content": "**Mass:**\n• Amount of matter in an object\n• Scalar quantity\n• Measured in kilograms (kg)\n• Remains constant everywhere\n\n**Weight:**\n• Gravitational force on an object\n• Vector quantity\n• Measured in Newtons (N)\n• Changes with location\n\n**Formula:** Weight = Mass × g\nW = m × g\n\n**Example:** A 60 kg person:\n• On Earth: W = 60 × 9.8 = 588 N\n• On Moon: W = 60 × 1.6 = 96 N"
+            },
+            {
+                "title": "Free Fall",
+                "type": "text",
+                "content": "**Free fall** is the motion of an object falling under the influence of gravity alone, with no air resistance.\n\n**Characteristics:**\n• All objects fall with the same acceleration (g)\n• Mass does not affect the rate of fall\n• In vacuum, a feather and stone fall together\n\n**Equations of Motion for Free Fall:**\n• v = u + gt\n• h = ut + ½gt²\n• v² = u² + 2gh\n\nWhere h is height and g is taken as positive for falling objects."
+            }
+        ]
+    },
+    "key_points": [
+        "Gravitational force is proportional to masses and inversely proportional to distance squared",
+        "Acceleration due to gravity (g) ≈ 9.8 m/s² on Earth's surface",
+        "Mass is constant; weight changes with gravity",
+        "Weight = Mass × g",
+        "In free fall, all objects fall with the same acceleration"
+    ],
+    "quiz_questions": [
+        {
+            "question": "What is the value of acceleration due to gravity on Earth?",
+            "type": "mcq",
+            "options": [
+                "9.8 m/s",
+                "9.8 m/s²",
+                "10 km/h",
+                "6.67 × 10⁻¹¹ m/s²"
+            ],
+            "correct": 1,
+            "explanation": "The acceleration due to gravity on Earth is approximately 9.8 m/s²."
+        },
+        {
+            "question": "What is the weight of a 10 kg object on Earth? (g = 10 m/s²)",
+            "type": "mcq",
+            "options": [
+                "10 N",
+                "100 N",
+                "1 N",
+                "10 kg"
+            ],
+            "correct": 1,
+            "explanation": "Weight = mass × g = 10 × 10 = 100 N"
+        },
+        {
+            "question": "If you go to the Moon, what happens to your mass and weight?",
+            "type": "mcq",
+            "options": [
+                "Both increase",
+                "Both decrease",
+                "Mass same, weight decreases",
+                "Mass decreases, weight same"
+            ],
+            "correct": 2,
+            "explanation": "Mass remains constant everywhere. Weight decreases on Moon because g is less there."
+        },
+        {
+            "question": "In a vacuum, which falls faster - a feather or a stone?",
+            "type": "mcq",
+            "options": [
+                "Stone",
+                "Feather",
+                "Both fall at the same rate",
+                "Neither falls"
+            ],
+            "correct": 2,
+            "explanation": "In a vacuum (no air resistance), all objects fall at the same rate regardless of mass."
+        }
+    ]
+}

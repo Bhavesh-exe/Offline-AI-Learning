@@ -1,0 +1,95 @@
+{
+    "id": "physics_04",
+    "title": "Work, Energy and Power",
+    "subject": "Physics",
+    "order": 4,
+    "difficulty": "intermediate",
+    "estimated_time_minutes": 22,
+    "learning_objectives": [
+        "Understand the scientific meaning of work",
+        "Learn about different forms of energy",
+        "Apply the law of conservation of energy",
+        "Calculate power in various situations"
+    ],
+    "content": {
+        "sections": [
+            {
+                "title": "What is Work?",
+                "type": "text",
+                "content": "In physics, **work** is done when a force causes displacement of an object.\n\n**Formula:** W = F × d × cos(θ)\n\nWhere:\n• W = Work done (in Joules)\n• F = Force applied (in Newtons)\n• d = Displacement (in meters)\n• θ = Angle between force and displacement\n\n**Conditions for work:**\n• Force must be applied\n• Object must move (displacement)\n• Force must have a component in the direction of motion\n\n**When force is in direction of motion:** W = F × d"
+            },
+            {
+                "title": "Types of Energy",
+                "type": "text",
+                "content": "**Kinetic Energy (KE):** Energy possessed by a moving object.\nFormula: KE = ½ × m × v²\n\n**Potential Energy (PE):** Energy stored due to position or configuration.\n• Gravitational PE = m × g × h\n• Elastic PE (in springs)\n\n**Other forms:**\n• Heat energy\n• Light energy\n• Sound energy\n• Chemical energy\n• Electrical energy\n• Nuclear energy"
+            },
+            {
+                "title": "Law of Conservation of Energy",
+                "type": "text",
+                "content": "**Statement:** Energy can neither be created nor destroyed. It can only be transformed from one form to another. The total energy of an isolated system remains constant.\n\n**Examples:**\n• A falling ball: PE → KE\n• Photosynthesis: Light energy → Chemical energy\n• Electric motor: Electrical energy → Mechanical energy\n• Rubbing hands: Mechanical energy → Heat energy\n\n**In free fall:** Total energy = PE + KE = constant\nAt top: All PE, zero KE\nAt bottom: Zero PE, all KE"
+            },
+            {
+                "title": "Power",
+                "type": "text",
+                "content": "**Power** is the rate of doing work or transferring energy.\n\n**Formula:** P = W / t = Energy / Time\n\nWhere:\n• P = Power (in Watts)\n• W = Work done (in Joules)\n• t = Time taken (in seconds)\n\n**Units:**\n• SI unit: Watt (W) = 1 Joule/second\n• 1 kilowatt (kW) = 1000 W\n• 1 horsepower (HP) = 746 W\n\n**Commercial unit of energy:** kilowatt-hour (kWh)\n1 kWh = 3.6 × 10⁶ Joules"
+            }
+        ]
+    },
+    "key_points": [
+        "Work = Force × Displacement (when force is in direction of motion)",
+        "Kinetic Energy = ½mv²; Potential Energy = mgh",
+        "Energy cannot be created or destroyed, only transformed",
+        "Power = Work / Time, measured in Watts",
+        "1 kWh = 3.6 million Joules"
+    ],
+    "quiz_questions": [
+        {
+            "question": "What is the SI unit of work?",
+            "type": "mcq",
+            "options": [
+                "Newton",
+                "Watt",
+                "Joule",
+                "Pascal"
+            ],
+            "correct": 2,
+            "explanation": "The SI unit of work is Joule (J), which equals Newton-meter."
+        },
+        {
+            "question": "A 2 kg ball is moving at 10 m/s. What is its kinetic energy?",
+            "type": "mcq",
+            "options": [
+                "20 J",
+                "100 J",
+                "50 J",
+                "200 J"
+            ],
+            "correct": 1,
+            "explanation": "KE = ½mv² = ½ × 2 × 10² = ½ × 2 × 100 = 100 J"
+        },
+        {
+            "question": "When a ball is thrown upward, at the highest point it has:",
+            "type": "mcq",
+            "options": [
+                "Maximum KE",
+                "Maximum PE",
+                "Equal KE and PE",
+                "Zero energy"
+            ],
+            "correct": 1,
+            "explanation": "At the highest point, velocity is zero (KE = 0) and height is maximum (maximum PE)."
+        },
+        {
+            "question": "A machine does 5000 J of work in 10 seconds. What is its power?",
+            "type": "mcq",
+            "options": [
+                "50 W",
+                "500 W",
+                "50000 W",
+                "5000 W"
+            ],
+            "correct": 1,
+            "explanation": "Power = Work/Time = 5000/10 = 500 W"
+        }
+    ]
+}

@@ -1,0 +1,100 @@
+{
+    "id": "physics_02",
+    "title": "Force and Laws of Motion",
+    "subject": "Physics",
+    "order": 2,
+    "difficulty": "intermediate",
+    "estimated_time_minutes": 20,
+    "learning_objectives": [
+        "Understand the concept of force",
+        "Learn Newton's three laws of motion",
+        "Apply laws to solve simple problems",
+        "Understand inertia and momentum"
+    ],
+    "content": {
+        "sections": [
+            {
+                "title": "What is Force?",
+                "type": "text",
+                "content": "Force is a push or pull that can change the state of motion of an object. Force can:\n\n• Start or stop motion\n• Change the speed of motion\n• Change the direction of motion\n• Change the shape of an object\n\nForce is measured in Newtons (N). It is a vector quantity with both magnitude and direction."
+            },
+            {
+                "title": "Newton's First Law - Law of Inertia",
+                "type": "text",
+                "content": "**Statement:** An object at rest stays at rest, and an object in motion stays in motion with the same speed and direction, unless acted upon by an unbalanced force.\n\n**Inertia** is the tendency of an object to resist changes in its state of motion.\n\n**Examples:**\n• Passengers lurch forward when a bus stops suddenly\n• A ball keeps rolling until friction stops it\n• Dust flies off when you beat a carpet"
+            },
+            {
+                "title": "Newton's Second Law",
+                "type": "text",
+                "content": "**Statement:** The acceleration of an object is directly proportional to the net force acting on it and inversely proportional to its mass.\n\n**Formula:** F = m × a\n\nWhere:\n• F = Force (in Newtons)\n• m = Mass (in kilograms)\n• a = Acceleration (in m/s²)\n\n**Example:** A 10 kg object accelerates at 5 m/s²\nForce = 10 × 5 = 50 N"
+            },
+            {
+                "title": "Newton's Third Law",
+                "type": "text",
+                "content": "**Statement:** For every action, there is an equal and opposite reaction.\n\n**Examples:**\n• When you push against a wall, the wall pushes back on you\n• A rocket expels gas downward, and the gas pushes the rocket upward\n• When you walk, you push the ground backward, and the ground pushes you forward\n\n**Note:** Action and reaction forces act on different objects, so they don't cancel out."
+            },
+            {
+                "title": "Momentum",
+                "type": "text",
+                "content": "**Momentum** is the quantity of motion of an object.\n\n**Formula:** p = m × v\n\nWhere:\n• p = Momentum (in kg·m/s)\n• m = Mass (in kg)\n• v = Velocity (in m/s)\n\n**Law of Conservation of Momentum:** In a closed system, the total momentum before a collision equals the total momentum after the collision."
+            }
+        ]
+    },
+    "key_points": [
+        "Force is a push or pull measured in Newtons",
+        "First Law: Objects resist changes in motion (inertia)",
+        "Second Law: F = m × a",
+        "Third Law: Every action has an equal and opposite reaction",
+        "Momentum = mass × velocity"
+    ],
+    "quiz_questions": [
+        {
+            "question": "What is the SI unit of force?",
+            "type": "mcq",
+            "options": [
+                "Joule",
+                "Newton",
+                "Pascal",
+                "Watt"
+            ],
+            "correct": 1,
+            "explanation": "The SI unit of force is Newton (N), named after Sir Isaac Newton."
+        },
+        {
+            "question": "A 5 kg object is pushed with a force of 20 N. What is its acceleration?",
+            "type": "mcq",
+            "options": [
+                "2 m/s²",
+                "4 m/s²",
+                "25 m/s²",
+                "100 m/s²"
+            ],
+            "correct": 1,
+            "explanation": "Using F = ma, we get a = F/m = 20/5 = 4 m/s²"
+        },
+        {
+            "question": "Which law explains why seatbelts are important in cars?",
+            "type": "mcq",
+            "options": [
+                "Law of Inertia",
+                "Second Law",
+                "Third Law",
+                "Law of Gravitation"
+            ],
+            "correct": 0,
+            "explanation": "The Law of Inertia (First Law) explains that your body continues moving forward when the car stops suddenly."
+        },
+        {
+            "question": "When a gun fires a bullet, the gun recoils. This is an example of which law?",
+            "type": "mcq",
+            "options": [
+                "First Law",
+                "Second Law",
+                "Third Law",
+                "Law of Conservation of Energy"
+            ],
+            "correct": 2,
+            "explanation": "Newton's Third Law: For every action (bullet going forward), there is an equal and opposite reaction (gun recoiling backward)."
+        }
+    ]
+}

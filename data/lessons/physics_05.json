@@ -1,0 +1,100 @@
+{
+    "id": "physics_05",
+    "title": "Sound",
+    "subject": "Physics",
+    "order": 5,
+    "difficulty": "intermediate",
+    "estimated_time_minutes": 20,
+    "learning_objectives": [
+        "Understand how sound is produced and travels",
+        "Learn about characteristics of sound waves",
+        "Explore speed of sound in different media",
+        "Understand echoes and applications of sound"
+    ],
+    "content": {
+        "sections": [
+            {
+                "title": "Production of Sound",
+                "type": "text",
+                "content": "**Sound is produced by vibrating objects.**\n\n**Examples:**\n• Vocal cords vibrate to produce voice\n• Guitar strings vibrate to produce music\n• Drum membrane vibrates when struck\n• Tuning fork prongs vibrate\n\n**Important:** Sound needs a medium (solid, liquid, or gas) to travel. It cannot travel through vacuum.\n\nIn space, astronauts cannot hear each other directly because there is no air!"
+            },
+            {
+                "title": "Sound Waves",
+                "type": "text",
+                "content": "Sound travels as **longitudinal waves** - particles vibrate back and forth in the same direction as the wave travels.\n\n**Compressions:** Regions where particles are close together (high pressure)\n\n**Rarefactions:** Regions where particles are far apart (low pressure)\n\n**Characteristics of sound waves:**\n• Wavelength (λ): Distance between two consecutive compressions or rarefactions\n• Frequency (f): Number of oscillations per second (measured in Hertz, Hz)\n• Amplitude: Maximum displacement of particles (determines loudness)"
+            },
+            {
+                "title": "Speed of Sound",
+                "type": "text",
+                "content": "**Formula:** v = f × λ (Speed = Frequency × Wavelength)\n\n**Speed of sound in different media:**\n• Air (at 20°C): 343 m/s\n• Water: 1498 m/s\n• Steel: 5960 m/s\n\n**General rule:** Sound travels fastest in solids, slower in liquids, and slowest in gases.\n\n**Factors affecting speed:**\n• Temperature (increases with temperature in gases)\n• Density and elasticity of medium"
+            },
+            {
+                "title": "Characteristics of Sound",
+                "type": "text",
+                "content": "**1. Loudness:**\n• How loud or soft a sound is\n• Depends on amplitude\n• Measured in decibels (dB)\n• Normal conversation: ~60 dB\n\n**2. Pitch:**\n• How high or low a sound is\n• Depends on frequency\n• High frequency → High pitch (whistle)\n• Low frequency → Low pitch (bass drum)\n\n**3. Quality/Timbre:**\n• What makes sounds unique\n• Why a guitar sounds different from a violin"
+            },
+            {
+                "title": "Echo and Applications",
+                "type": "text",
+                "content": "**Echo:** Reflection of sound from a surface back to the listener.\n\nFor echo to be heard distinctly:\n• Minimum distance to reflecting surface: 17.2 m\n• Time gap required: 0.1 second\n\n**Applications of sound:**\n• **SONAR:** Used by ships to detect underwater objects\n• **Ultrasound:** Medical imaging, cleaning\n• **Stethoscope:** Doctors listen to heart sounds\n• **Megaphone:** Amplifies sound\n\n**Ultrasound:** Sound with frequency > 20,000 Hz (above human hearing range)"
+            }
+        ]
+    },
+    "key_points": [
+        "Sound is produced by vibrating objects and needs a medium to travel",
+        "Sound travels as longitudinal waves with compressions and rarefactions",
+        "Speed of sound: Solids > Liquids > Gases",
+        "Loudness depends on amplitude; Pitch depends on frequency",
+        "Echo requires minimum 17.2 m distance"
+    ],
+    "quiz_questions": [
+        {
+            "question": "Sound waves are:",
+            "type": "mcq",
+            "options": [
+                "Transverse waves",
+                "Longitudinal waves",
+                "Electromagnetic waves",
+                "Surface waves"
+            ],
+            "correct": 1,
+            "explanation": "Sound waves are longitudinal waves where particles vibrate parallel to the direction of wave travel."
+        },
+        {
+            "question": "In which medium does sound travel fastest?",
+            "type": "mcq",
+            "options": [
+                "Air",
+                "Water",
+                "Steel",
+                "Vacuum"
+            ],
+            "correct": 2,
+            "explanation": "Sound travels fastest in solids like steel because particles are closely packed."
+        },
+        {
+            "question": "What determines the pitch of a sound?",
+            "type": "mcq",
+            "options": [
+                "Amplitude",
+                "Frequency",
+                "Wavelength",
+                "Speed"
+            ],
+            "correct": 1,
+            "explanation": "Pitch is determined by frequency - higher frequency means higher pitch."
+        },
+        {
+            "question": "Why can't sound travel through space?",
+            "type": "mcq",
+            "options": [
+                "Space is too cold",
+                "Space has no gravity",
+                "Space is a vacuum (no medium)",
+                "Space is too large"
+            ],
+            "correct": 2,
+            "explanation": "Sound needs a medium (solid, liquid, or gas) to travel. Space is a vacuum with no particles."
+        }
+    ]
+}
